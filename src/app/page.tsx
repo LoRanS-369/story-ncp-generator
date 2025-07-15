@@ -70,7 +70,7 @@ export default function Home() {
                   Structure NCP complète
                 </div>
               </div>
-              <Link href="/generate-story" passHref>
+              <Link href="/story-generator" passHref>
                 <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-3">
                   Créer une Histoire
                 </Button>
