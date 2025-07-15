@@ -1,99 +1,58 @@
+// src/app/api/openrouter/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { openRouter, FREE_MODELS } from '@/lib/openrouter';
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const { prompt, model, maxTokens, temperature, systemMessage } = await request.json();
+    const { prompt, maxTokens = 1500, temperature = 0.8, systemMessage = '' } = await req.json();
 
     if (!prompt) {
-      return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
+      return NextResponse.json({ error: 'Prompt manquant' }, { status: 400 });
     }
 
-    if (!openRouter.isConfigured()) {
-      return NextResponse.json({
-        error: 'OpenRouter not configured',
-        message: 'Add NEXT_PUBLIC_OPENROUTER_API_KEY to your .env.local file',
-        help: 'Get your free API key from https://openrouter.ai/'
-      }, { status: 400 });
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: 'Clé API absente (OPENROUTER_API_KEY)' }, { status: 500 });
     }
 
-    const result = await openRouter.generateText(prompt, {
-      model,
-      maxTokens,
-      temperature,
-      systemMessage
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': process.env.VERCEL_URL
+          ? `https://${process.env.VERCEL_URL}`
+          : 'http://localhost:3000',
+        'X-Title': 'Story NCP Generator',
+      },
+      body: JSON.stringify({
+        model: 'qwen/qwen-2.5-72b-instruct:free',
+        messages: [
+          { role: 'system', content: systemMessage },
+          { role: 'user', content: prompt },
+        ],
+        max_tokens: maxTokens,
+        temperature,
+      }),
     });
 
-    return NextResponse.json({
-      success: true,
-      result,
-      model: model || process.env.NEXT_PUBLIC_DEFAULT_MODEL
-    });
+    if (!res.ok) {
+      const err = await res.text();
+      return NextResponse.json({ error: err }, { status: res.status });
+    }
 
-  } catch (error) {
-    console.error('OpenRouter API error:', error);
-    return NextResponse.json({
-      error: 'Failed to generate text',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    const data = await res.json();
+    const result = data.choices?.[0]?.message?.content || '';
+
+    return NextResponse.json({ result });
+  } catch (e: any) {
+    console.error('Erreur /api/openrouter:', e);
+    return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const action = searchParams.get('action');
-
-  switch (action) {
-    case 'models':
-      return NextResponse.json({
-        freeModels: FREE_MODELS,
-        currentModel: process.env.NEXT_PUBLIC_DEFAULT_MODEL
-      });
-
-    case 'test':
-      if (!openRouter.isConfigured()) {
-        return NextResponse.json({
-          configured: false,
-          message: 'OpenRouter not configured',
-          help: 'Add NEXT_PUBLIC_OPENROUTER_API_KEY to .env.local'
-        });
-      }
-
-      try {
-        const testResult = await openRouter.generateText('Dis bonjour en français', {
-          maxTokens: 50
-        });
-
-        return NextResponse.json({
-          configured: true,
-          test: testResult,
-          model: process.env.NEXT_PUBLIC_DEFAULT_MODEL
-        });
-      } catch (error) {
-        return NextResponse.json({
-          configured: false,
-          error: error instanceof Error ? error.message : 'Test failed'
-        });
-      }
-
-    case 'status':
-      return NextResponse.json({
-        configured: openRouter.isConfigured(),
-        currentModel: process.env.NEXT_PUBLIC_DEFAULT_MODEL,
-        availableModels: Object.keys(FREE_MODELS).length,
-        apiUrl: process.env.NEXT_PUBLIC_OPENROUTER_BASE_URL
-      });
-
-    default:
-      return NextResponse.json({
-        message: 'OpenRouter API endpoint ready',
-        endpoints: {
-          'POST /': 'Générer du texte',
-          'GET /?action=models': 'Liste des modèles gratuits',
-          'GET /?action=test': 'Tester la configuration',
-          'GET /?action=status': 'Statut de configuration'
-        },
-        freeModelsCount: Object.keys(FREE_MODELS).length
-      });
-  }
+export async function GET() {
+  const key = process.env.OPENROUTER_API_KEY;
+  return NextResponse.json({
+    configured: !!key && key !== 'sk-or-v1-votre-cle-openrouter-ici',
+  });
 }
