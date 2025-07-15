@@ -33,19 +33,15 @@ export default function StoryGenerator() {
   const [loading, setLoading] = useState(false);
   const [openRouterStatus, setOpenRouterStatus] = useState(false);
 
-  // Vérifie qu’OpenRouter est joignable
+  // Vérifie qu’OpenRouter est joignable via la route serveur
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch('/api/openrouter', { method: 'HEAD' });
-        setOpenRouterStatus(res.ok);
-      } catch {
-        setOpenRouterStatus(false);
-      }
-    })();
+    fetch('/api/openrouter?action=test')
+      .then((r) => r.json())
+      .then((data) => setOpenRouterStatus(data.configured))
+      .catch(() => setOpenRouterStatus(false));
   }, []);
 
-  // Fonction de génération
+  // Fonction de génération via la route serveur
   async function generate() {
     if (!config.prompt) return;
 
@@ -53,8 +49,8 @@ export default function StoryGenerator() {
     setResult('');
 
     const fullPrompt = `Ecris une histoire complète de genre ${config.genre} avec un ton ${config.tone} et un style ${config.style}.
-IDEE : ${config.prompt}
-PARAMETRES :
+IDÉE : ${config.prompt}
+PARAMÈTRES :
 - Longueur : ${config.length}
 - Public cible : ${config.target_audience}
 - Perspective narrative : ${config.perspective}
@@ -83,17 +79,13 @@ Crée une histoire engageante avec :
               ? 2000
               : 3000,
           temperature: 0.8,
-          systemMessage: `Tu es un écrivain professionnel spécialisé dans la création d'histoires de genre ${config.genre}. Écris avec un style ${config.style} et un ton ${config.tone}.`,
+          systemMessage: `Tu es un écrivain professionnel spécialisé dans la création d'histoires de genre ${config.genre}.`,
         }),
       });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Erreur inconnue');
-      }
-
       const data = await res.json();
-      setResult(data.result || 'Histoire générée avec succès !');
+      if (!res.ok) throw new Error(data.error?.message || 'Erreur inconnue');
+      setResult(data.result || 'Aucun résultat');
     } catch (error: any) {
       setResult(`Erreur : ${error.message}`);
     } finally {
@@ -142,7 +134,7 @@ Crée une histoire engageante avec :
                 <CardTitle>Configuration de l’Histoire</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* ... tous tes Select / Input existants ... */}
+                {/* Genre */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Genre</label>
                   <Select
@@ -168,6 +160,7 @@ Crée une histoire engageante avec :
                   </Select>
                 </div>
 
+                {/* Ton */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Ton</label>
                   <Select
@@ -192,9 +185,10 @@ Crée une histoire engageante avec :
                   </Select>
                 </div>
 
+                {/* Style d’écriture */}
                 <div>
                   <label className="block text-sm font-medium mb-2">
-                    Style d’Écriture
+                    Style d’écriture
                   </label>
                   <Select
                     value={config.style}
@@ -205,9 +199,7 @@ Crée une histoire engageante avec :
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="descriptif">Descriptif</SelectItem>
-                      <SelectItem value="dialogue-intensif">
-                        Dialogue intensif
-                      </SelectItem>
+                      <SelectItem value="dialogue-intensif">Dialogue intensif</SelectItem>
                       <SelectItem value="action">Action</SelectItem>
                       <SelectItem value="introspectif">Introspectif</SelectItem>
                       <SelectItem value="poetique">Poétique</SelectItem>
@@ -218,10 +210,9 @@ Crée une histoire engageante avec :
                   </Select>
                 </div>
 
+                {/* Longueur */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Longueur
-                  </label>
+                  <label className="block text-sm font-medium mb-2">Longueur</label>
                   <Select
                     value={config.length}
                     onValueChange={(v) => setConfig({ ...config, length: v })}
@@ -231,17 +222,16 @@ Crée une histoire engageante avec :
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="short">Courte (500-800 mots)</SelectItem>
-                      <SelectItem value="medium">
-                        Moyenne (1000-1500 mots)
-                      </SelectItem>
+                      <SelectItem value="medium">Moyenne (1000-1500 mots)</SelectItem>
                       <SelectItem value="long">Longue (2000-3000 mots)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
+                {/* Public cible */}
                 <div>
                   <label className="block text-sm font-medium mb-2">
-                    Public Cible
+                    Public cible
                   </label>
                   <Select
                     value={config.target_audience}
@@ -252,18 +242,17 @@ Crée une histoire engageante avec :
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="children">Enfants (8-12 ans)</SelectItem>
-                      <SelectItem value="young_adult">
-                        Jeunes adultes (13-17 ans)
-                      </SelectItem>
+                      <SelectItem value="young_adult">Jeunes adultes (13-17 ans)</SelectItem>
                       <SelectItem value="adult">Adultes (18+ ans)</SelectItem>
                       <SelectItem value="all_ages">Tous âges</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
+                {/* Perspective narrative */}
                 <div>
                   <label className="block text-sm font-medium mb-2">
-                    Perspective Narrative
+                    Perspective narrative
                   </label>
                   <Select
                     value={config.perspective}
@@ -273,22 +262,17 @@ Crée une histoire engageante avec :
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="first_person">
-                        Première personne (Je)
-                      </SelectItem>
-                      <SelectItem value="third_person">
-                        Troisième personne (Il/Elle)
-                      </SelectItem>
-                      <SelectItem value="omniscient">
-                        Narrateur omniscient
-                      </SelectItem>
+                      <SelectItem value="first_person">Première personne (Je)</SelectItem>
+                      <SelectItem value="third_person">Troisième personne (Il/Elle)</SelectItem>
+                      <SelectItem value="omniscient">Narrateur omniscient</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
+                {/* Type de conflit */}
                 <div>
                   <label className="block text-sm font-medium mb-2">
-                    Type de Conflit
+                    Type de conflit
                   </label>
                   <Select
                     value={config.conflict_type}
@@ -305,9 +289,10 @@ Crée une histoire engageante avec :
                   </Select>
                 </div>
 
+                {/* Thème */}
                 <div>
                   <label className="block text-sm font-medium mb-2">
-                    Thème Principal (optionnel)
+                    Thème principal (optionnel)
                   </label>
                   <Input
                     value={config.theme}
@@ -321,9 +306,10 @@ Crée une histoire engageante avec :
 
           {/* Colonne droite : prompt + résultat */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Prompt */}
             <Card>
               <CardHeader>
-                <CardTitle>Votre Idée d’Histoire</CardTitle>
+                <CardTitle>Votre idée d’histoire</CardTitle>
               </CardHeader>
               <CardContent>
                 <Textarea
@@ -347,11 +333,10 @@ Crée une histoire engageante avec :
                         Génération en cours...
                       </>
                     ) : (
-                      'Générer l’Histoire Complète'
+                      'Générer l’histoire'
                     )}
                   </Button>
                 </div>
-
                 {!openRouterStatus && (
                   <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
                     <p className="text-sm text-orange-800">
@@ -363,9 +348,10 @@ Crée une histoire engageante avec :
               </CardContent>
             </Card>
 
+            {/* Résultat */}
             <Card>
               <CardHeader>
-                <CardTitle>Histoire Générée</CardTitle>
+                <CardTitle>Histoire générée</CardTitle>
               </CardHeader>
               <CardContent>
                 {result ? (
@@ -381,7 +367,7 @@ Crée une histoire engageante avec :
                         variant="outline"
                         size="sm"
                       >
-                        Copier le texte
+                        Copier
                       </Button>
                       <Button
                         onClick={() => setResult('')}
@@ -428,7 +414,7 @@ Crée une histoire engageante avec :
         {/* Exemples d’idées */}
         <Card className="mt-8 bg-white/60">
           <CardHeader>
-            <CardTitle>Exemples d’Idées d’Histoires</CardTitle>
+            <CardTitle>Exemples d’idées d’histoires</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
