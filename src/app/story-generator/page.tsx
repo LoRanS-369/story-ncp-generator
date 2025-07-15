@@ -5,21 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Link from 'next/link';
 
 export default function UnifiedGenerator() {
   const [tab, setTab] = useState('story');
 
-  const [storyConfig, setStoryConfig] = useState({
+  /* ---------- HISTOIRE ---------- */
+  const [story, setStory] = useState({
     prompt: '',
     genre: 'none',
     tone: 'none',
@@ -29,41 +24,48 @@ export default function UnifiedGenerator() {
     perspective: 'none',
     conflict_type: 'none',
     theme: '',
+    writing_style: 'none',
   });
 
-  const [characterConfig, setCharacterConfig] = useState({
+  /* ---------- PERSONNAGES ---------- */
+  const [character, setCharacter] = useState({
     name: '',
     role: 'none',
+    archetype: 'none',
     age: '',
-    traits: '',
-    background: '',
+    gender: 'none',
+    personality_traits: '',
+    skills: '',
+    flaws: '',
+    backstory: '',
+    motivation: '',
+    conflict: '',
+    appearance: '',
   });
 
-  const [chapterConfig, setChapterConfig] = useState({
+  /* ---------- CHAPITRES ---------- */
+  const [chapters, setChapters] = useState({
     count: '1',
-    plan: '',
-    summary: '',
+    structure: 'none',
+    pacing: 'none',
+    plot_points: '',
+    cliffhangers: false,
+    flashbacks: false,
+    multiple_timelines: false,
   });
 
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
   const [openRouterStatus, setOpenRouterStatus] = useState(false);
 
-  // Vérifie qu’OpenRouter est OK
-  const checkOpenRouter = async () => {
-    const res = await fetch('/api/openrouter?action=test');
-    const data = await res.json();
-    setOpenRouterStatus(data.configured);
-  };
-
-  // Charge une fois
   useState(() => {
-    checkOpenRouter();
+    fetch('/api/openrouter?action=test')
+      .then((r) => r.json())
+      .then((data) => setOpenRouterStatus(data.configured));
   });
 
-  // Génération unique
   async function generateAll() {
-    if (!storyConfig.prompt) {
+    if (!story.prompt) {
       alert('Veuillez saisir une idée d’histoire.');
       return;
     }
@@ -72,32 +74,44 @@ export default function UnifiedGenerator() {
     setResult('');
 
     const fullPrompt = `
-GÉNÉRATION UNIFIÉE :
+GÉNÉRATION UNIFIÉE
 
-1) HISTOIRE :
-- Idée : ${storyConfig.prompt}
-- Genre : ${storyConfig.genre}
-- Ton : ${storyConfig.tone}
-- Style : ${storyConfig.style}
-- Longueur : ${storyConfig.length}
-- Public : ${storyConfig.target_audience}
-- Perspective : ${storyConfig.perspective}
-- Conflit : ${storyConfig.conflict_type}
-- Thème : ${storyConfig.theme || 'libre'}
+📖 HISTOIRE
+Idee : ${story.prompt}
+Genre : ${story.genre}
+Ton : ${story.tone}
+Style : ${story.style}
+Longueur : ${story.length}
+Public : ${story.target_audience}
+Perspective : ${story.perspective}
+Conflit : ${story.conflict_type}
+Theme : ${story.theme}
+Style ecriture : ${story.writing_style}
 
-2) PERSONNAGE :
-- Nom : ${characterConfig.name || 'non défini'}
-- Rôle : ${characterConfig.role}
-- Âge : ${characterConfig.age || 'non défini'}
-- Traits : ${characterConfig.traits || 'non définis'}
-- Background : ${characterConfig.background || 'non défini'}
+👤 PERSONNAGE
+Nom : ${character.name}
+Role : ${character.role}
+Archetype : ${character.archetype}
+Age : ${character.age}
+Genre : ${character.gender}
+Personnalite : ${character.personality_traits}
+Competences : ${character.skills}
+Defauts : ${character.flaws}
+Background : ${character.backstory}
+Motivation : ${character.motivation}
+Conflit : ${character.conflict}
+Apparence : ${character.appearance}
 
-3) CHAPITRES :
-- Nombre : ${chapterConfig.count}
-- Plan : ${chapterConfig.plan || 'libre'}
-- Résumé : ${chapterConfig.summary || 'non défini'}
+📚 CHAPITRES
+Nombre : ${chapters.count}
+Structure : ${chapters.structure}
+Rythme : ${chapters.pacing}
+Points clefs : ${chapters.plot_points}
+Cliffhangers : ${chapters.cliffhangers}
+Flashbacks : ${chapters.flashbacks}
+Timelines multiples : ${chapters.multiple_timelines}
 
-Génère une histoire complète, avec personnages et structure de chapitres.
+Génère une histoire complète, avec personnages et plan de chapitres.
 `;
 
     try {
@@ -106,13 +120,11 @@ Génère une histoire complète, avec personnages et structure de chapitres.
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: fullPrompt,
-          maxTokens: 2500,
+          maxTokens: 3000,
           temperature: 0.8,
-          systemMessage:
-            'Tu es un écrivain professionnel, créatif et structuré. Tu génères une histoire complète avec personnages et chapitres.',
+          systemMessage: 'Tu es un écrivain professionnel, créatif et structuré.',
         }),
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur inconnue');
       setResult(data.result || 'Aucun résultat');
@@ -123,30 +135,40 @@ Génère une histoire complète, avec personnages et structure de chapitres.
     }
   }
 
-  // Envoi à n8n
   async function sendToN8n() {
     if (!result) {
       alert('Aucun texte à envoyer.');
       return;
     }
-
     try {
-      const res = await fetch('https://n8n.ton-domaine.com/webhook/story-ncp', {
+      await fetch('https://n8n.ton-domaine.com/webhook/story-ncp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: Date.now(),
-          title: storyConfig.prompt.slice(0, 50) + '...',
+          title: story.prompt.slice(0, 50) + '...',
           content: result,
-          metadata: { ...storyConfig, ...characterConfig, ...chapterConfig },
+          metadata: { story, character, chapters },
         }),
       });
-      if (!res.ok) throw new Error('Erreur n8n');
       alert('Envoyé à n8n avec succès !');
-    } catch (error: any) {
-      alert('Erreur lors de l’envoi à n8n : ' + error.message);
+    } catch {
+      alert('Erreur lors de l’envoi à n8n.');
     }
   }
+
+  /* ---------- Helper ---------- */
+  const SelectField = ({ label, value, onChange, children }: any) => (
+    <div>
+      <label className="block text-sm font-medium mb-1">{label}</label>
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>{children}</SelectContent>
+      </Select>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
@@ -154,28 +176,15 @@ Génère une histoire complète, avec personnages et structure de chapitres.
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-blue-600">
-                Générateur Unifié
-              </h1>
-              <p className="text-gray-600 mt-2">
-                Histoire + Personnages + Chapitres → en une seule page
-              </p>
+              <h1 className="text-3xl font-bold text-blue-600">Générateur Unifié</h1>
+              <p className="text-gray-600 mt-2">Histoire + Personnages + Chapitres sur une seule page</p>
             </div>
-            <div className="flex items-center gap-3">
-              <Badge
-                variant="outline"
-                className={
-                  openRouterStatus
-                    ? 'bg-green-50 text-green-700'
-                    : 'bg-red-50 text-red-700'
-                }
-              >
-                OpenRouter {openRouterStatus ? 'OK' : 'KO'}
-              </Badge>
-              <Link href="/">
-                <Button variant="outline">Retour Accueil</Button>
-              </Link>
-            </div>
+            <Badge
+              variant="outline"
+              className={openRouterStatus ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}
+            >
+              OpenRouter {openRouterStatus ? 'OK' : 'KO'}
+            </Badge>
           </div>
         </div>
       </header>
@@ -184,236 +193,257 @@ Génère une histoire complète, avec personnages et structure de chapitres.
         <Tabs value={tab} onValueChange={setTab} className="w-full">
           <TabsList className="mb-6">
             <TabsTrigger value="story">📖 Histoire</TabsTrigger>
-            <TabsTrigger value="character">👤 Personnage</TabsTrigger>
-            <TabsTrigger value="chapter">📚 Chapitre</TabsTrigger>
+            <TabsTrigger value="character">👤 Personnages</TabsTrigger>
+            <TabsTrigger value="chapter">📚 Chapitres</TabsTrigger>
           </TabsList>
 
-          {/* Onglet Histoire */}
+          {/* HISTOIRE */}
           <TabsContent value="story">
             <Card>
               <CardHeader>
                 <CardTitle>Configuration de l’histoire</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Select
-                  value={storyConfig.genre}
-                  onValueChange={(v) => setStoryConfig({ ...storyConfig, genre: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Genre" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Aucun</SelectItem>
-                    <SelectItem value="fantasy">Fantasy</SelectItem>
-                    <SelectItem value="science-fiction">Science-Fiction</SelectItem>
-                    <SelectItem value="mystere">Mystère</SelectItem>
-                    <SelectItem value="thriller">Thriller</SelectItem>
-                    <SelectItem value="romance">Romance</SelectItem>
-                    <SelectItem value="drame">Drame</SelectItem>
-                    <SelectItem value="horreur">Horreur</SelectItem>
-                    <SelectItem value="aventure">Aventure</SelectItem>
-                    <SelectItem value="comedie">Comédie</SelectItem>
-                    <SelectItem value="historique">Historique</SelectItem>
-                    <SelectItem value="contemporain">Contemporain</SelectItem>
-                  </SelectContent>
-                </Select>
+                <SelectField label="Genre" value={story.genre} onChange={(v: string) => setStory({ ...story, genre: v })}>
+                  <SelectItem value="none">Aucun</SelectItem>
+                  <SelectItem value="fantasy">Fantasy</SelectItem>
+                  <SelectItem value="science-fiction">Science-Fiction</SelectItem>
+                  <SelectItem value="mystere">Mystère</SelectItem>
+                  <SelectItem value="thriller">Thriller</SelectItem>
+                  <SelectItem value="romance">Romance</SelectItem>
+                  <SelectItem value="drame">Drame</SelectItem>
+                  <SelectItem value="horreur">Horreur</SelectItem>
+                  <SelectItem value="aventure">Aventure</SelectItem>
+                  <SelectItem value="comedie">Comédie</SelectItem>
+                  <SelectItem value="historique">Historique</SelectItem>
+                  <SelectItem value="contemporain">Contemporain</SelectItem>
+                </SelectField>
 
-                <Select
-                  value={storyConfig.tone}
-                  onValueChange={(v) => setStoryConfig({ ...storyConfig, tone: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Ton" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Aucun</SelectItem>
-                    <SelectItem value="leger">Léger</SelectItem>
-                    <SelectItem value="sombre">Sombre</SelectItem>
-                    <SelectItem value="humoristique">Humoristique</SelectItem>
-                    <SelectItem value="serieux">Sérieux</SelectItem>
-                    <SelectItem value="dramatique">Dramatique</SelectItem>
-                    <SelectItem value="optimiste">Optimiste</SelectItem>
-                    <SelectItem value="neutre">Neutre</SelectItem>
-                    <SelectItem value="mysterieux">Mystérieux</SelectItem>
-                    <SelectItem value="romantique">Romantique</SelectItem>
-                    <SelectItem value="ironique">Ironique</SelectItem>
-                  </SelectContent>
-                </Select>
+                <SelectField label="Ton" value={story.tone} onChange={(v: string) => setStory({ ...story, tone: v })}>
+                  <SelectItem value="none">Aucun</SelectItem>
+                  <SelectItem value="leger">Léger</SelectItem>
+                  <SelectItem value="sombre">Sombre</SelectItem>
+                  <SelectItem value="humoristique">Humoristique</SelectItem>
+                  <SelectItem value="serieux">Sérieux</SelectItem>
+                  <SelectItem value="dramatique">Dramatique</SelectItem>
+                  <SelectItem value="optimiste">Optimiste</SelectItem>
+                  <SelectItem value="neutre">Neutre</SelectItem>
+                  <SelectItem value="mysterieux">Mystérieux</SelectItem>
+                  <SelectItem value="romantique">Romantique</SelectItem>
+                  <SelectItem value="ironique">Ironique</SelectItem>
+                </SelectField>
 
-                <Select
-                  value={storyConfig.style}
-                  onValueChange={(v) => setStoryConfig({ ...storyConfig, style: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Style d'écriture" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Aucun</SelectItem>
-                    <SelectItem value="descriptif">Descriptif</SelectItem>
-                    <SelectItem value="dialogue-intensif">Dialogue intensif</SelectItem>
-                    <SelectItem value="action">Action</SelectItem>
-                    <SelectItem value="introspectif">Introspectif</SelectItem>
-                    <SelectItem value="poetique">Poétique</SelectItem>
-                    <SelectItem value="minimaliste">Minimaliste</SelectItem>
-                    <SelectItem value="classique">Classique</SelectItem>
-                    <SelectItem value="moderne">Moderne</SelectItem>
-                  </SelectContent>
-                </Select>
+                <SelectField label="Style d’écriture" value={story.style} onChange={(v: string) => setStory({ ...story, style: v })}>
+                  <SelectItem value="none">Aucun</SelectItem>
+                  <SelectItem value="descriptif">Descriptif</SelectItem>
+                  <SelectItem value="dialogue-intensif">Dialogue intensif</SelectItem>
+                  <SelectItem value="action">Action</SelectItem>
+                  <SelectItem value="introspectif">Introspectif</SelectItem>
+                  <SelectItem value="poetique">Poétique</SelectItem>
+                  <SelectItem value="minimaliste">Minimaliste</SelectItem>
+                  <SelectItem value="classique">Classique</SelectItem>
+                  <SelectItem value="moderne">Moderne</SelectItem>
+                </SelectField>
 
-                <Select
-                  value={storyConfig.length}
-                  onValueChange={(v) => setStoryConfig({ ...storyConfig, length: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Longueur" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Aucun</SelectItem>
-                    <SelectItem value="short">Courte (500-800 mots)</SelectItem>
-                    <SelectItem value="medium">Moyenne (1000-1500 mots)</SelectItem>
-                    <SelectItem value="long">Longue (2000-3000 mots)</SelectItem>
-                  </SelectContent>
-                </Select>
+                <SelectField label="Longueur" value={story.length} onChange={(v: string) => setStory({ ...story, length: v })}>
+                  <SelectItem value="none">Aucun</SelectItem>
+                  <SelectItem value="short">Courte (500-800 mots)</SelectItem>
+                  <SelectItem value="medium">Moyenne (1000-1500 mots)</SelectItem>
+                  <SelectItem value="long">Longue (2000-3000 mots)</SelectItem>
+                </SelectField>
 
-                <Select
-                  value={storyConfig.target_audience}
-                  onValueChange={(v) => setStoryConfig({ ...storyConfig, target_audience: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Public cible" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Aucun</SelectItem>
-                    <SelectItem value="children">Enfants (8-12 ans)</SelectItem>
-                    <SelectItem value="young_adult">Jeunes adultes (13-17 ans)</SelectItem>
-                    <SelectItem value="adult">Adultes (18+ ans)</SelectItem>
-                    <SelectItem value="all_ages">Tous âges</SelectItem>
-                  </SelectContent>
-                </Select>
+                <SelectField label="Public cible" value={story.target_audience} onChange={(v: string) => setStory({ ...story, target_audience: v })}>
+                  <SelectItem value="none">Aucun</SelectItem>
+                  <SelectItem value="children">Enfants (8-12 ans)</SelectItem>
+                  <SelectItem value="young_adult">Jeunes adultes (13-17 ans)</SelectItem>
+                  <SelectItem value="adult">Adultes (18+ ans)</SelectItem>
+                  <SelectItem value="all_ages">Tous âges</SelectItem>
+                </SelectField>
 
-                <Select
-                  value={storyConfig.perspective}
-                  onValueChange={(v) => setStoryConfig({ ...storyConfig, perspective: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Perspective narrative" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Aucun</SelectItem>
-                    <SelectItem value="first_person">Première personne (Je)</SelectItem>
-                    <SelectItem value="third_person">Troisième personne (Il/Elle)</SelectItem>
-                    <SelectItem value="omniscient">Narrateur omniscient</SelectItem>
-                  </SelectContent>
-                </Select>
+                <SelectField label="Perspective narrative" value={story.perspective} onChange={(v: string) => setStory({ ...story, perspective: v })}>
+                  <SelectItem value="none">Aucun</SelectItem>
+                  <SelectItem value="first_person">Première personne (Je)</SelectItem>
+                  <SelectItem value="third_person">Troisième personne (Il/Elle)</SelectItem>
+                  <SelectItem value="omniscient">Narrateur omniscient</SelectItem>
+                </SelectField>
 
-                <Select
-                  value={storyConfig.conflict_type}
-                  onValueChange={(v) => setStoryConfig({ ...storyConfig, conflict_type: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Type de conflit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Aucun</SelectItem>
-                    <SelectItem value="internal">Conflit interne</SelectItem>
-                    <SelectItem value="external">Conflit externe</SelectItem>
-                    <SelectItem value="both">Les deux</SelectItem>
-                  </SelectContent>
-                </Select>
+                <SelectField label="Type de conflit" value={story.conflict_type} onChange={(v: string) => setStory({ ...story, conflict_type: v })}>
+                  <SelectItem value="none">Aucun</SelectItem>
+                  <SelectItem value="internal">Conflit interne</SelectItem>
+                  <SelectItem value="external">Conflit externe</SelectItem>
+                  <SelectItem value="both">Les deux</SelectItem>
+                </SelectField>
+
+                <SelectField label="Style d’écriture" value={story.writing_style} onChange={(v: string) => setStory({ ...story, writing_style: v })}>
+                  <SelectItem value="none">Aucun</SelectItem>
+                  <SelectItem value="narratif">Narratif</SelectItem>
+                  <SelectItem value="descriptif">Descriptif</SelectItem>
+                  <SelectItem value="dialogue">Dialogue intensif</SelectItem>
+                  <SelectItem value="action">Action</SelectItem>
+                  <SelectItem value="introspectif">Introspectif</SelectItem>
+                </SelectField>
 
                 <Input
-                  value={storyConfig.theme}
-                  onChange={(e) => setStoryConfig({ ...storyConfig, theme: e.target.value })}
-                  placeholder="Thème principal (optionnel)"
+                  value={story.theme}
+                  onChange={(e) => setStory({ ...story, theme: e.target.value })}
+                  placeholder="Thème principal"
                 />
               </CardContent>
             </Card>
 
             <Textarea
-              value={storyConfig.prompt}
-              onChange={(e) => setStoryConfig({ ...storyConfig, prompt: e.target.value })}
+              value={story.prompt}
+              onChange={(e) => setStory({ ...story, prompt: e.target.value })}
               placeholder="Décrivez votre idée d’histoire..."
-              className="min-h-24 mt-4"
+              className="mt-4 min-h-20"
             />
           </TabsContent>
 
-          {/* Onglet Personnage */}
+          {/* PERSONNAGE */}
           <TabsContent value="character">
             <Card>
               <CardHeader>
-                <CardTitle>Configuration du personnage</CardTitle>
+                <CardTitle>Fiche personnage complète</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                  value={characterConfig.name}
-                  onChange={(e) => setCharacterConfig({ ...characterConfig, name: e.target.value })}
-                  placeholder="Nom du personnage"
+                  value={character.name}
+                  onChange={(e) => setCharacter({ ...character, name: e.target.value })}
+                  placeholder="Nom"
                 />
-                <Select
-                  value={characterConfig.role}
-                  onValueChange={(v) => setCharacterConfig({ ...characterConfig, role: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Rôle" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Aucun</SelectItem>
-                    <SelectItem value="protagoniste">Protagoniste</SelectItem>
-                    <SelectItem value="antagoniste">Antagoniste</SelectItem>
-                    <SelectItem value="mentor">Mentor</SelectItem>
-                    <SelectItem value="allié">Allié</SelectItem>
-                    <SelectItem value="secondaire">Secondaire</SelectItem>
-                  </SelectContent>
-                </Select>
+                <SelectField label="Rôle" value={character.role} onChange={(v: string) => setCharacter({ ...character, role: v })}>
+                  <SelectItem value="none">Aucun</SelectItem>
+                  <SelectItem value="protagoniste">Protagoniste</SelectItem>
+                  <SelectItem value="antagoniste">Antagoniste</SelectItem>
+                  <SelectItem value="mentor">Mentor</SelectItem>
+                  <SelectItem value="allié">Allié</SelectItem>
+                  <SelectItem value="secondaire">Secondaire</SelectItem>
+                </SelectField>
+                <SelectField label="Archetype" value={character.archetype} onChange={(v: string) => setCharacter({ ...character, archetype: v })}>
+                  <SelectItem value="none">Aucun</SelectItem>
+                  <SelectItem value="heros">Héros</SelectItem>
+                  <SelectItem value="antiheros">Anti-héros</SelectItem>
+                  <SelectItem value="mentor">Mentor</SelectItem>
+                  <SelectItem value="shadow">Ombre</SelectItem>
+                  <SelectItem value="trickster">Trickster</SelectItem>
+                  <SelectItem value="guardian">Gardien</SelectItem>
+                </SelectField>
                 <Input
-                  value={characterConfig.age}
-                  onChange={(e) => setCharacterConfig({ ...characterConfig, age: e.target.value })}
+                  value={character.age}
+                  onChange={(e) => setCharacter({ ...character, age: e.target.value })}
                   placeholder="Âge"
                 />
+                <SelectField label="Genre" value={character.gender} onChange={(v: string) => setCharacter({ ...character, gender: v })}>
+                  <SelectItem value="none">Aucun</SelectItem>
+                  <SelectItem value="masculin">Masculin</SelectItem>
+                  <SelectItem value="feminin">Féminin</SelectItem>
+                  <SelectItem value="non-binaire">Non-binaire</SelectItem>
+                </SelectField>
                 <Input
-                  value={characterConfig.traits}
-                  onChange={(e) => setCharacterConfig({ ...characterConfig, traits: e.target.value })}
-                  placeholder="Traits de caractère"
+                  value={character.personality_traits}
+                  onChange={(e) => setCharacter({ ...character, personality_traits: e.target.value })}
+                  placeholder="Traits de personnalité"
+                />
+                <Input
+                  value={character.skills}
+                  onChange={(e) => setCharacter({ ...character, skills: e.target.value })}
+                  placeholder="Compétences"
+                />
+                <Input
+                  value={character.flaws}
+                  onChange={(e) => setCharacter({ ...character, flaws: e.target.value })}
+                  placeholder="Défauts"
                 />
                 <Textarea
-                  value={characterConfig.background}
-                  onChange={(e) =>
-                    setCharacterConfig({ ...characterConfig, background: e.target.value })
-                  }
+                  value={character.backstory}
+                  onChange={(e) => setCharacter({ ...character, backstory: e.target.value })}
                   placeholder="Background / historique"
+                  className="col-span-2 min-h-20"
+                />
+                <Textarea
+                  value={character.motivation}
+                  onChange={(e) => setCharacter({ ...character, motivation: e.target.value })}
+                  placeholder="Motivation"
+                  className="col-span-2 min-h-20"
+                />
+                <Textarea
+                  value={character.conflict}
+                  onChange={(e) => setCharacter({ ...character, conflict: e.target.value })}
+                  placeholder="Conflit interne/externe"
+                  className="col-span-2 min-h-20"
+                />
+                <Textarea
+                  value={character.appearance}
+                  onChange={(e) => setCharacter({ ...character, appearance: e.target.value })}
+                  placeholder="Apparence physique"
                   className="col-span-2 min-h-20"
                 />
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Onglet Chapitre */}
+          {/* CHAPITRES */}
           <TabsContent value="chapter">
             <Card>
               <CardHeader>
-                <CardTitle>Structure des chapitres</CardTitle>
+                <CardTitle>Planification des chapitres</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Select
-                  value={chapterConfig.count}
-                  onValueChange={(v) => setChapterConfig({ ...chapterConfig, count: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Nombre de chapitres" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1</SelectItem>
-                    <SelectItem value="3">3</SelectItem>
-                    <SelectItem value="5">5</SelectItem>
-                    <SelectItem value="7">7</SelectItem>
-                  </SelectContent>
-                </Select>
+                <SelectField label="Nombre de chapitres" value={chapters.count} onChange={(v: string) => setChapters({ ...chapters, count: v })}>
+                  <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="3">3</SelectItem>
+                  <SelectItem value="5">5</SelectItem>
+                  <SelectItem value="7">7</SelectItem>
+                  <SelectItem value="10">10</SelectItem>
+                </SelectField>
+
+                <SelectField label="Structure narrative" value={chapters.structure} onChange={(v: string) => setChapters({ ...chapters, structure: v })}>
+                  <SelectItem value="none">Aucun</SelectItem>
+                  <SelectItem value="acte-3">Acte 3</SelectItem>
+                  <SelectItem value="acte-5">Acte 5</SelectItem>
+                  <SelectItem value="hero-journey">Hero’s Journey</SelectItem>
+                  <SelectItem value="freytag">Freytag</SelectItem>
+                </SelectField>
+
+                <SelectField label="Rythme narratif" value={chapters.pacing} onChange={(v: string) => setChapters({ ...chapters, pacing: v })}>
+                  <SelectItem value="none">Aucun</SelectItem>
+                  <SelectItem value="lent">Lent</SelectItem>
+                  <SelectItem value="modere">Modéré</SelectItem>
+                  <SelectItem value="rapide">Rapide</SelectItem>
+                  <SelectItem value="variable">Variable</SelectItem>
+                </SelectField>
+
                 <Textarea
-                  value={chapterConfig.plan}
-                  onChange={(e) => setChapterConfig({ ...chapterConfig, plan: e.target.value })}
-                  placeholder="Plan global (début, milieu, fin)"
+                  value={chapters.plot_points}
+                  onChange={(e) => setChapters({ ...chapters, plot_points: e.target.value })}
+                  placeholder="Points clés de l’intrigue"
                   className="col-span-2 min-h-20"
                 />
+
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={chapters.cliffhangers}
+                    onChange={(e) => setChapters({ ...chapters, cliffhangers: e.target.checked })}
+                  />
+                  Cliffhangers
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={chapters.flashbacks}
+                    onChange={(e) => setChapters({ ...chapters, flashbacks: e.target.checked })}
+                  />
+                  Flashbacks
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={chapters.multiple_timelines}
+                    onChange={(e) => setChapters({ ...chapters, multiple_timelines: e.target.checked })}
+                  />
+                  Timelines multiples
+                </label>
               </CardContent>
             </Card>
           </TabsContent>
@@ -423,7 +453,7 @@ Génère une histoire complète, avec personnages et structure de chapitres.
         <div className="mt-6 flex flex-col sm:flex-row gap-4">
           <Button
             onClick={generateAll}
-            disabled={!storyConfig.prompt || loading || !openRouterStatus}
+            disabled={!story.prompt || loading || !openRouterStatus}
             className="bg-blue-600 hover:bg-blue-700"
           >
             {loading ? 'Génération en cours...' : 'Générer tout'}
@@ -433,7 +463,6 @@ Génère une histoire complète, avec personnages et structure de chapitres.
           </Button>
         </div>
 
-        {/* Résultat */}
         {result && (
           <Card className="mt-6">
             <CardHeader>
