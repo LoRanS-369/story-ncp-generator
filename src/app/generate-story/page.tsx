@@ -11,12 +11,11 @@ export default function GenerateStory() {
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
-  const [openRouterStatus, setOpenRouterStatus] = useState<{
-    configured: boolean;
-    testing: boolean;
-  }>({ configured: false, testing: false });
+  const [openRouterStatus, setOpenRouterStatus] = useState({
+    configured: false,
+    testing: false
+  });
 
-  // Vérifier le statut OpenRouter au chargement
   useEffect(() => {
     checkOpenRouterStatus();
   }, []);
@@ -46,7 +45,7 @@ export default function GenerateStory() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: `Génère une histoire créative basée sur cette idée : ${prompt}
-          
+
 Crée une histoire complète avec :
 - Un début engageant
 - Des personnages intéressants  
@@ -77,16 +76,15 @@ Style : narratif et immersif.`,
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
-      {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                📚 Générateur d'Histoires
+                📚 Générateur d&apos;Histoires
               </h1>
               <p className="text-gray-600 mt-2">
-                Créez des histoires uniques avec l'aide de l'intelligence artificielle
+                Créez des histoires uniques avec l&apos;aide de l&apos;intelligence artificielle
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -112,6 +110,12 @@ Style : narratif et immersif.`,
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
-          {/* Zone de saisie */}
           <Card className="bg-white/90 backdrop-blur-sm shadow-xl border-0">
             <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                ✨ Votre Idée d&apos;Histoire
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Textarea
+                placeholder="Décrivez votre idée d'histoire...
