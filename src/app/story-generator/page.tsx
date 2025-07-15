@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-/* ---------- Helper : menu déroulant multi-choix ---------- */
+/* ---------- Helper ---------- */
 const SelectMulti = ({ label, value, onChange, options }: any) => (
   <div>
     <label className="block text-sm font-medium mb-1">{label}</label>
@@ -31,10 +31,38 @@ const SelectMulti = ({ label, value, onChange, options }: any) => (
   </div>
 );
 
+const TextWithSuggestion = ({ label, value, onChange, placeholder }: any) => {
+  const [loading, setLoading] = useState(false);
+  const suggest = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/openrouter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: `Suggère une idée créative pour : ${label}` }),
+      });
+      const data = await res.json();
+      onChange(data.result?.trim() || '');
+    } catch {
+      alert('Erreur suggestion');
+    } finally {
+      setLoading(false);
+    }
+  };
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="block text-sm font-medium">{label}</label>
+      <Textarea value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="min-h-20" />
+      <Button onClick={suggest} size="sm" variant="outline" disabled={loading}>
+        💡 {loading ? '…' : 'Suggérer'}
+      </Button>
+    </div>
+  );
+};
+
 export default function UltimateNCPGenerator() {
   const [tab, setTab] = useState('story');
 
-  /* ---------- ÉTAT ---------- */
   const [story, setStory] = useState({
     prompt: '',
     title: '',
@@ -45,12 +73,12 @@ export default function UltimateNCPGenerator() {
     commercialGoal: '',
     respectNCP: false,
     seo: false,
+    splitAudio: false,
   });
 
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
 
-  /* ---------- UTILS ---------- */
   const handleMulti = (setter: any, key: string) => (v: string) =>
     setter((prev: any) => ({ ...prev, [key]: v.split(',').filter(Boolean) }));
 
@@ -71,10 +99,9 @@ export default function UltimateNCPGenerator() {
     }
   };
 
-  /* ---------- OPTIONS ---------- */
-  const genres = ["Éducation","Original","Classique","Humour","Science-fiction","Space opera","Extra-terrestre","Dystopie","Uchronie","Steampunk","Action","Thriller","Horreur","Réaliste","Biographie","Fiction","Non-fiction","Drame","Mystère","Voyage dans le temps","Bataille","Comédie","Kawaii","Magie","Fantasy","Aventure","Vengeance","Samouraï","Ninja","Suspense","Guérison","Émotion","Superpouvoirs","Crime","Vie quotidienne","Compétition","Historique","Épique","Guerre","Sports"];
-  const loveOptions = ["Intrigue","Romance légère","Romance intense","Romance complexe","Dark Romance","Boys' Love","Girls’ Love","Triangle amoureux","Amour impossible","Érotique","Amour toxique","Amour à distance","Amour virtuel","Amour interdit","Amour perdu","Amour polyamoureux"];
-  const events = ["Sauver le monde","Triangle amoureux","Trahison","Secret de famille","Amour interdit","Développement du personnage","Croissance dans l'adversité","Complot politique","Mystère historique","Révolution technologique"];
+  const genres = ["Éducation","Original","Classique","Humour","Science-fiction","Fantasy","Aventure","Drame","Mystère","Comédie","Romance","Horreur","Action","Historique","Épique","Crime","Vie quotidienne","Compétition"];
+  const loveOptions = ["Romance légère","Romance intense","Amour impossible","Triangle amoureux","Amour interdit","Amour toxique","Amour virtuel","Amour polyamoureux"];
+  const events = ["Sauver le monde","Triangle amoureux","Trahison","Secret de famille","Développement du personnage","Croissance dans l'adversité","Révolution technologique"];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
@@ -90,11 +117,6 @@ export default function UltimateNCPGenerator() {
           <TabsList className="mb-6">
             <TabsTrigger value="story">📖 Histoire</TabsTrigger>
             <TabsTrigger value="advanced">📋 Paramètres</TabsTrigger>
-            <TabsTrigger value="character">👤 Personnages</TabsTrigger>
-            <TabsTrigger value="chapter">📚 Chapitres</TabsTrigger>
-            <TabsTrigger value="links">🔗 Liens & intrigues</TabsTrigger>
-            <TabsTrigger value="locations">📍 Lieux</TabsTrigger>
-            <TabsTrigger value="themes">📚 Thèmes</TabsTrigger>
           </TabsList>
 
           {/* ONGLET HISTOIRE */}
@@ -102,8 +124,8 @@ export default function UltimateNCPGenerator() {
             <Card>
               <CardHeader><CardTitle>Idée de base</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <TextWithSuggestion label="Titre du livre" value={story.title} onChange={(v) => setStory({ ...story, title: v })} placeholder="Titre" />
                 <Textarea value={story.prompt} onChange={(e) => setStory({ ...story, prompt: e.target.value })} placeholder="Pitch ou idée de base" className="min-h-20" />
-                <Input value={story.title} onChange={(e) => setStory({ ...story, title: e.target.value })} placeholder="Titre du livre" />
               </CardContent>
             </Card>
           </TabsContent>
@@ -118,14 +140,17 @@ export default function UltimateNCPGenerator() {
                 <SelectMulti label="Événements" value={story.event} onChange={handleMulti(setStory, 'event')} options={events} />
                 <SelectMulti label="Support final" value={[story.supportType]} onChange={(v) => setStory({ ...story, supportType: v[0] })} options={["Ebook","Livre audio","Podcast","Vidéo","Article de blog","Autre"]} />
                 <SelectMulti label="Objectif commercial" value={[story.commercialGoal]} onChange={(v) => setStory({ ...story, commercialGoal: v[0] })} options={["Commercialisable","Création pure","Autre"]} />
+
                 <label className="flex items-center gap-2">
                   <input type="checkbox" checked={story.respectNCP} onChange={(e) => setStory({ ...story, respectNCP: e.target.checked })} />
                   ✅ Respect du NCP (Narrative Context Protocol)
                 </label>
+
                 <label className="flex items-center gap-2">
                   <input type="checkbox" checked={story.seo} onChange={(e) => setStory({ ...story, seo: e.target.checked })} />
                   🔍 Optimiser SEO (article blog)
                 </label>
+
                 <label className="flex items-center gap-2">
                   <input type="checkbox" checked={story.splitAudio} onChange={(e) => setStory({ ...story, splitAudio: e.target.checked })} />
                   🔊 Séparer audio pour plusieurs voix
@@ -143,7 +168,7 @@ export default function UltimateNCPGenerator() {
 
           {result && (
             <Card className="mt-6">
-              <CardHeader><CardTitle>Résultat généré</CardTitle></CardContent>
+              <CardHeader><CardTitle>Résultat généré</CardTitle></CardHeader>
               <CardContent>
                 <pre className="whitespace-pre-wrap text-sm">{result}</pre>
               </CardContent>
