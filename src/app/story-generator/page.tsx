@@ -27,22 +27,29 @@ export default function StoryGenerator() {
   const [openRouterStatus, setOpenRouterStatus] = useState(false);
 
   const checkOpenRouter = async () => {
-    try {
-      const res = await fetch(`${window.location.origin}/api/openrouter?action=status`);
-      const data = await res.json();
-      setOpenRouterStatus(data.configured || false);
-    } catch (error) {
-      console.error('Erreur OpenRouter:', error);
-    }
-  };
+   try {
+  const res = await fetch(`${window.location.origin}/api/openrouter`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      prompt: fullPrompt,
+      maxTokens: config.length === 'short' ? 1000 : config.length === 'medium' ? 2000 : 3000,
+      temperature: 0.8,
+      systemMessage: `Tu es un ecrivain professionnel specialise dans la creation d'histoires de genre ${config.genre}. Ecris avec un style ${config.style} et un ton ${config.tone}.`
+    })
+  });
 
-  useEffect(() => {
-    checkOpenRouter();
-  }, []);
+  if (!res.ok) {
+    throw new Error(`HTTP error! status: ${res.status}`);
+  }
 
-  const generate = async () => {
-    if (!config.prompt) return;
-    setLoading(true);
+  const data = await res.json();
+  setResult(data.result || 'Histoire generee avec succes!');
+} catch (error) {
+  console.error('Erreur lors de la génération de l’histoire:', error);
+  setResult(`Erreur de connexion: ${error.message}`);
+}
+
 
     try {
       const fullPrompt = `Ecris une histoire complete de genre ${config.genre} avec un ton ${config.tone} et un style ${config.style}.
