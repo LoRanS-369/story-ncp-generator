@@ -31,6 +31,35 @@ const SelectMulti = ({ label, value, onChange, options }: any) => (
   </div>
 );
 
+const TextWithSuggestion = ({ label, value, onChange, placeholder }: any) => {
+  const [loading, setLoading] = useState(false);
+  const suggest = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/openrouter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: `Suggère une idée créative pour : ${label}` }),
+      });
+      const data = await res.json();
+      onChange(data.result?.trim() || '');
+    } catch {
+      alert('Erreur suggestion');
+    } finally {
+      setLoading(false);
+    }
+  };
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="block text-sm font-medium">{label}</label>
+      <Textarea value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="min-h-20" />
+      <Button onClick={suggest} size="sm" variant="outline" disabled={loading}>
+        💡 {loading ? '…' : 'Suggérer'}
+      </Button>
+    </div>
+  );
+};
+
 export default function UltimateNCPGenerator() {
   const [tab, setTab] = useState('story');
 
@@ -228,6 +257,14 @@ export default function UltimateNCPGenerator() {
                 <SelectMulti label="Structure" value={[chapters.structure]} onChange={(v) => setChapters({ ...chapters, structure: v[0] })} options={["Acte 3","Hero’s Journey","Freytag","Save the Cat!"]} />
                 <Textarea value={chapters.midpoint} onChange={(e) => setChapters({ ...chapters, midpoint: e.target.value })} placeholder="Twist central" className="min-h-20" />
                 <Textarea value={chapters.climax} onChange={(e) => setChapters({ ...chapters, climax: e.target.value })} placeholder="Climax" className="min-h-20" />
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" checked={chapters.cliffhangers} onChange={(e) => setChapters({ ...chapters, cliffhangers: e.target.checked })} />
+                  Cliffhangers
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" checked={chapters.flashbacks} onChange={(e) => setChapters({ ...chapters, flashbacks: e.target.checked })} />
+                  Flashbacks
+                </label>
               </CardContent>
             </Card>
           </TabsContent>
