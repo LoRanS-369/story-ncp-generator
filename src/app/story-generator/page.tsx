@@ -225,7 +225,7 @@ export default function UltimateGenerator() {
   const perspectives = ["Première personne", "Deuxième personne", "Troisième personne", "Omniscient", "Flux de conscience", "Épistolaire", "Perspective multiples", "Interactif", "Observateur", "Œil de caméra", "Narrateur peu fiable"];
   const locations = ["Ville moderne", "Quartier historique", "Banlieue", "Centre commercial", "Ghetto urbain", "Ferme", "Village", "Forêt", "Montagnes", "Lacs", "Plage tropicale", "Port", "Île déserte", "Station balnéaire", "Royaume magique", "Univers parallèle", "Post-apo", "Espace", "Monde sous-marin", "Égypte antique", "Moyen Âge", "Cyberpunk", "Laboratoire", "Train", "Navire", "Station spatiale", "Casino", "Stade"];
 
-  return (
+    return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       <header className="bg-white border-b shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-6">
@@ -292,4 +292,46 @@ export default function UltimateGenerator() {
                 <TextWithSuggestion label="Apparence" value={character.appearance} onChange={(v: string) => setCharacter({ ...character, appearance: v })} placeholder="Apparence physique" />
                 <TextWithSuggestion label="Personnalité" value={character.personality} onChange={(v: string) => setCharacter({ ...character, personality: v })} placeholder="Traits de personnalité" />
                 <TextWithSuggestion label="Background" value={character.backstory} onChange={(v: string) => setCharacter({ ...character, backstory: v })} placeholder="Historique" />
-                <TextWithSuggestion label="Motivation" value={character.motivation} onChange={(v: string) => setCharacter({ ...
+                <TextWithSuggestion label="Motivation" value={character.motivation} onChange={(v: string) => setCharacter({ ...character, motivation: v })} placeholder="Motivation" />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="chapter">
+            <Card>
+              <CardHeader><CardTitle>Planification des chapitres</CardTitle></CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SelectField label="Nombre de chapitres" value={chapters.count} onChange={(v: string) => setChapters({ ...chapters, count: v })}>
+                  <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="3">3</SelectItem>
+                  <SelectItem value="5">5</SelectItem>
+                  <SelectItem value="7">7</SelectItem>
+                  <SelectItem value="10">10</SelectItem>
+                </SelectField>
+                <TextWithSuggestion label="Twist du milieu" value={chapters.midpoint} onChange={(v: string) => setChapters({ ...chapters, midpoint: v })} placeholder="Twist central" />
+                <TextWithSuggestion label="Climax" value={chapters.climax} onChange={(v: string) => setChapters({ ...chapters, climax: v })} placeholder="Climax" />
+                <TextWithSuggestion label="Résolution" value={chapters.resolution} onChange={(v: string) => setChapters({ ...chapters, resolution: v })} placeholder="Résolution finale" />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        <div className="mt-6 flex flex-wrap gap-2">
+          <Button onClick={generateStory} disabled={loading || !openRouterStatus}>Générer</Button>
+          <Button onClick={analyseNarrative} disabled={loading}>📊 Analyser</Button>
+          <Button onClick={corrigerRepetitions} disabled={loading}>✏️ Corriger répétitions</Button>
+          <Button onClick={sendToN8n} disabled={!result}>📤 Envoyer à n8n</Button>
+        </div>
+
+        {result && (
+          <Card className="mt-6">
+            <CardHeader><CardTitle>Résultat</CardTitle></CardHeader>
+            <CardContent>
+              <pre className="whitespace-pre-wrap text-sm">{result}</pre>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}
