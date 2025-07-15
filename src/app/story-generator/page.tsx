@@ -34,6 +34,7 @@ const SelectMulti = ({ label, value, onChange, options }: any) => (
 export default function UltimateNCPGenerator() {
   const [tab, setTab] = useState('story');
 
+  /* ---------- ÉTAT GLOBAL ---------- */
   const [story, setStory] = useState({
     prompt: '',
     title: '',
@@ -134,7 +135,7 @@ export default function UltimateNCPGenerator() {
   };
 
   /* ---------- OPTIONS ---------- */
-  const genres = ["Éducation","Original","Classique","Humour","Science-fiction","Fantasy","Aventure","Drame","Mystère","Comédie","Romance","Horreur","Action","Historique","Épique","Crime","Vie quotidienne","Compétition"];
+  const genres = ["Éducation","Original","Classique","Humour","Science-fiction","Space opera","Extra-terrestre","Dystopie","Uchronie","Steampunk","Action","Thriller","Horreur","Réaliste","Biographie","Fiction","Non-fiction","Drame","Mystère","Voyage dans le temps","Bataille","Comédie","Kawaii","Magie","Fantasy","Aventure","Vengeance","Samouraï","Ninja","Suspense","Guérison","Émotion","Superpouvoirs","Crime","Vie quotidienne","Compétition","Historique","Épique","Guerre","Sports"];
   const loveOptions = ["Romance légère","Romance intense","Amour impossible","Triangle amoureux","Amour interdit","Amour toxique","Amour virtuel","Amour polyamoureux"];
   const events = ["Sauver le monde","Triangle amoureux","Trahison","Secret de famille","Développement du personnage","Croissance dans l'adversité","Révolution technologique"];
   const creativityLevels = ["Conservateur","Équilibré","Inventif","Expérimental","Traditionnel","Innovant","Classique","Moderne","Avant-Gardiste","Éclectique"];
@@ -174,7 +175,7 @@ export default function UltimateNCPGenerator() {
             </Card>
           </TabsContent>
 
-          {/* ONGLET PARAMÈTRES */}
+          {/* ONGLET PARAMÈTRES AVANCÉS */}
           <TabsContent value="advanced">
             <Card>
               <CardHeader><CardTitle>📋 Paramètres avancés</CardTitle></CardHeader>
@@ -227,6 +228,51 @@ export default function UltimateNCPGenerator() {
                 <SelectMulti label="Structure" value={[chapters.structure]} onChange={(v) => setChapters({ ...chapters, structure: v[0] })} options={["Acte 3","Hero’s Journey","Freytag","Save the Cat!"]} />
                 <Textarea value={chapters.midpoint} onChange={(e) => setChapters({ ...chapters, midpoint: e.target.value })} placeholder="Twist central" className="min-h-20" />
                 <Textarea value={chapters.climax} onChange={(e) => setChapters({ ...chapters, climax: e.target.value })} placeholder="Climax" className="min-h-20" />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ONGLET LIENS & INTRIGUES */}
+          <TabsContent value="links">
+            <Card>
+              <CardHeader><CardTitle>Liens & intrigues</CardTitle></CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.keys(links).map((key) => (
+                  <label key={key} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={(links as any)[key]}
+                      onChange={(e) => setLinks({ ...links, [key]: e.target.checked })}
+                    />
+                    {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                  </label>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ONGLET LIEUX */}
+          <TabsContent value="locations">
+            <Card>
+              <CardHeader><CardTitle>Lieux des actions</CardTitle></CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SelectMulti label="Urbain" value={locations.urban} onChange={(v) => setLocations({ ...locations, urban: v })} options={["Ville Moderne","Quartier Historique","Banlieue Résidentielle","Centre Commercial","Ghetto Urbain"]} />
+                <SelectMulti label="Rural" value={locations.rural} onChange={(v) => setLocations({ ...locations, rural: v })} options={["Ferme Agricole","Village de Campagne","Forêt et Nature","Montagnes et Collines","Lacs et Rivières"]} />
+                <SelectMulti label="Côtier" value={locations.coastal} onChange={(v) => setLocations({ ...locations, coastal: v })} options={["Plage Tropicale","Port de Pêche","Île Déserte","Station Balnéaire","Falaises et Grottes Marines"]} />
+                <SelectMulti label="Fantastique" value={locations.fantasy} onChange={(v) => setLocations({ ...locations, fantasy: v })} options={["Royaume Magique","Univers Parallèle","Monde Post-Apocalyptique","Espace et Planètes Lointaines","Monde Sous-Marin"]} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ONGLET THÈMES */}
+          <TabsContent value="themes">
+            <Card>
+              <CardHeader><CardTitle>Thèmes des livres</CardTitle></CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SelectMulti label="Général" value={themes.general} onChange={(v) => setThemes({ ...themes, general: v })} options={["Romans","Science-fiction","Fantasy","Bandes dessinées","Santé","Sport","Érotique","Professionnel"]} />
+                <SelectMulti label="Sport" value={themes.sport} onChange={(v) => setThemes({ ...themes, sport: v })} options={["Entraînement","Football","Tennis","Sports de plein air","Sports collectifs","Sports individuels"]} />
+                <SelectMulti label="Érotique" value={themes.erotic} onChange={(v) => setThemes({ ...themes, erotic: v })} options={["Romans Érotiques","Nouvelles érotiques","Érotique LGBTQ+","Guides érotiques","Fantasmes et fétichismes"]} />
+                <SelectMulti label="Professionnel" value={themes.professional} onChange={(v) => setThemes({ ...themes, professional: v })} options={["Développement Personnel","Technologie","Gestion de projet","Marketing","Finance","Santé au travail","Entrepreneuriat","Droit","Langues","Éducation"]} />
               </CardContent>
             </Card>
           </TabsContent>
