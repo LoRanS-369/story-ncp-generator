@@ -1,6 +1,5 @@
 'use client';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -29,7 +28,7 @@ export default function StoryGenerator() {
 
   const checkOpenRouter = async () => {
     try {
-      const res = await fetch('/api/openrouter?action=status');
+      const res = await fetch(`${window.location.origin}/api/openrouter?action=status`);
       const data = await res.json();
       setOpenRouterStatus(data.configured || false);
     } catch (error) {
@@ -37,36 +36,32 @@ export default function StoryGenerator() {
     }
   };
 
-  useState(() => {
+  useEffect(() => {
     checkOpenRouter();
-  });
+  }, []);
 
   const generate = async () => {
     if (!config.prompt) return;
     setLoading(true);
-    
+
     try {
       const fullPrompt = `Ecris une histoire complete de genre ${config.genre} avec un ton ${config.tone} et un style ${config.style}.
-
 IDEE: ${config.prompt}
-
 PARAMETRES:
 - Longueur: ${config.length}
-- Public cible: ${config.target_audience}  
+- Public cible: ${config.target_audience}
 - Perspective narrative: ${config.perspective}
 - Type de conflit: ${config.conflict_type}
 - Style d'ecriture: ${config.writing_style}
 - Theme principal: ${config.theme || 'libre'}
-
 Cree une histoire engageante avec:
 - Un debut captivant
 - Des personnages interessants
 - Une intrigue bien construite
 - Un denouement satisfaisant
-
 Ecris en francais avec un style ${config.writing_style} et adapte le contenu pour ${config.target_audience}.`;
 
-      const res = await fetch('/api/openrouter', {
+      const res = await fetch(`${window.location.origin}/api/openrouter`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -76,7 +71,7 @@ Ecris en francais avec un style ${config.writing_style} et adapte le contenu pou
           systemMessage: `Tu es un ecrivain professionnel specialise dans la creation d'histoires de genre ${config.genre}. Ecris avec un style ${config.style} et un ton ${config.tone}.`
         })
       });
-      
+
       if (res.ok) {
         const data = await res.json();
         setResult(data.result || 'Histoire generee avec succes!');
@@ -87,7 +82,7 @@ Ecris en francais avec un style ${config.writing_style} et adapte le contenu pou
     } catch (error) {
       setResult('Erreur de connexion: ' + error);
     }
-    
+
     setLoading(false);
   };
 
@@ -115,17 +110,14 @@ Ecris en francais avec un style ${config.writing_style} et adapte le contenu pou
           </div>
         </div>
       </header>
-
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
                 <CardTitle>Configuration de l Histoire</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                
                 <div>
                   <label className="block text-sm font-medium mb-2">Genre</label>
                   <Select value={config.genre} onValueChange={(value) => setConfig({...config, genre: value})}>
@@ -148,7 +140,6 @@ Ecris en francais avec un style ${config.writing_style} et adapte le contenu pou
                     </SelectContent>
                   </Select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium mb-2">Ton</label>
                   <Select value={config.tone} onValueChange={(value) => setConfig({...config, tone: value})}>
@@ -170,7 +161,6 @@ Ecris en francais avec un style ${config.writing_style} et adapte le contenu pou
                     </SelectContent>
                   </Select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium mb-2">Style d Ecriture</label>
                   <Select value={config.style} onValueChange={(value) => setConfig({...config, style: value})}>
@@ -190,7 +180,6 @@ Ecris en francais avec un style ${config.writing_style} et adapte le contenu pou
                     </SelectContent>
                   </Select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium mb-2">Longueur</label>
                   <Select value={config.length} onValueChange={(value) => setConfig({...config, length: value})}>
@@ -205,7 +194,6 @@ Ecris en francais avec un style ${config.writing_style} et adapte le contenu pou
                     </SelectContent>
                   </Select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium mb-2">Public Cible</label>
                   <Select value={config.target_audience} onValueChange={(value) => setConfig({...config, target_audience: value})}>
@@ -221,7 +209,6 @@ Ecris en francais avec un style ${config.writing_style} et adapte le contenu pou
                     </SelectContent>
                   </Select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium mb-2">Perspective Narrative</label>
                   <Select value={config.perspective} onValueChange={(value) => setConfig({...config, perspective: value})}>
@@ -236,7 +223,6 @@ Ecris en francais avec un style ${config.writing_style} et adapte le contenu pou
                     </SelectContent>
                   </Select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium mb-2">Type de Conflit</label>
                   <Select value={config.conflict_type} onValueChange={(value) => setConfig({...config, conflict_type: value})}>
@@ -251,7 +237,6 @@ Ecris en francais avec un style ${config.writing_style} et adapte le contenu pou
                     </SelectContent>
                   </Select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium mb-2">Theme Principal (optionnel)</label>
                   <Input
@@ -260,13 +245,10 @@ Ecris en francais avec un style ${config.writing_style} et adapte le contenu pou
                     placeholder="Ex: amitie, courage, redemption..."
                   />
                 </div>
-
               </CardContent>
             </Card>
           </div>
-
           <div className="lg:col-span-2 space-y-6">
-            
             <Card>
               <CardHeader>
                 <CardTitle>Votre Idee d Histoire</CardTitle>
@@ -275,19 +257,13 @@ Ecris en francais avec un style ${config.writing_style} et adapte le contenu pou
                 <Textarea
                   value={config.prompt}
                   onChange={(e) => setConfig({...config, prompt: e.target.value})}
-                  placeholder="Decrivez votre idee d histoire en detail...
-
-Exemples:
-- Une detective qui decouvre que tous les crimes de sa ville sont lies a un mysterieux cafe ouvert la nuit
-- Un adolescent trouve un carnet qui predit l avenir, mais chaque prediction a un prix inattendu
-- Dans un monde ou les emotions ont des couleurs visibles, une personne nait sans couleur emotionnelle
-- Un bibliothecaire decouvre que certains livres de sa collection peuvent modifier la realite"
+                  placeholder="Decrivez votre idee d histoire en detail..."
                   className="min-h-32 mb-4"
                 />
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">{config.prompt.length} caracteres</span>
-                  <Button 
-                    onClick={generate} 
+                  <Button
+                    onClick={generate}
                     disabled={!config.prompt || loading || !openRouterStatus}
                     className="bg-blue-600 hover:bg-blue-700"
                   >
@@ -301,7 +277,6 @@ Exemples:
                     )}
                   </Button>
                 </div>
-                
                 {!openRouterStatus && (
                   <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
                     <p className="text-sm text-orange-800">
@@ -311,7 +286,6 @@ Exemples:
                 )}
               </CardContent>
             </Card>
-
             <Card>
               <CardHeader>
                 <CardTitle>Histoire Generee</CardTitle>
@@ -325,21 +299,21 @@ Exemples:
                       </pre>
                     </div>
                     <div className="flex gap-2 flex-wrap">
-                      <Button 
+                      <Button
                         onClick={() => navigator.clipboard.writeText(result)}
                         variant="outline"
                         size="sm"
                       >
                         Copier le Texte
                       </Button>
-                      <Button 
+                      <Button
                         onClick={() => setResult('')}
                         variant="outline"
                         size="sm"
                       >
                         Effacer
                       </Button>
-                      <Button 
+                      <Button
                         onClick={() => {
                           const blob = new Blob([result], { type: 'text/plain' });
                           const url = URL.createObjectURL(blob);
@@ -364,10 +338,8 @@ Exemples:
                 )}
               </CardContent>
             </Card>
-
           </div>
         </div>
-        
         <Card className="mt-8 bg-white/60">
           <CardHeader>
             <CardTitle>Exemples d Idees d Histoires</CardTitle>
