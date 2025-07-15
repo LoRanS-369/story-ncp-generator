@@ -10,6 +10,8 @@ export async function POST(req: NextRequest) {
     }
 
     const apiKey = process.env.OPENROUTER_API_KEY;
+    console.log('🔑 Clé API lue :', apiKey ? 'Présente' : 'Absente');
+
     if (!apiKey) {
       return NextResponse.json({ error: 'Clé API absente (OPENROUTER_API_KEY)' }, { status: 500 });
     }
@@ -37,15 +39,15 @@ export async function POST(req: NextRequest) {
 
     if (!res.ok) {
       const err = await res.text();
+      console.error('❌ Erreur OpenRouter :', err);
       return NextResponse.json({ error: err }, { status: res.status });
     }
 
     const data = await res.json();
     const result = data.choices?.[0]?.message?.content || '';
-
     return NextResponse.json({ result });
   } catch (e: any) {
-    console.error('Erreur /api/openrouter:', e);
+    console.error('❌ Erreur serveur :', e);
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
