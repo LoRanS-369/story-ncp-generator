@@ -1,5 +1,4 @@
 // Service OpenRouter pour LLM gratuits
-
 export interface OpenRouterConfig {
   apiKey: string;
   baseUrl: string;
@@ -24,28 +23,28 @@ export const FREE_MODELS = {
   'qwen/qwen-2.5-72b-instruct:free': {
     name: 'Qwen 2.5 72B (Gratuit)',
     description: 'Excellent modèle multilingue, très performant',
-    maxTokens: 32768
+    maxTokens: 32768,
   },
   'meta-llama/llama-3.2-3b-instruct:free': {
     name: 'Llama 3.2 3B (Gratuit)',
     description: 'Modèle Meta rapide et efficace',
-    maxTokens: 8192
+    maxTokens: 8192,
   },
   'microsoft/phi-3-mini-128k-instruct:free': {
     name: 'Phi-3 Mini (Gratuit)',
     description: 'Modèle Microsoft compact',
-    maxTokens: 128000
+    maxTokens: 128000,
   },
   'google/gemma-2-9b-it:free': {
     name: 'Gemma 2 9B (Gratuit)',
     description: 'Modèle Google performant',
-    maxTokens: 8192
+    maxTokens: 8192,
   },
   'huggingface/zephyr-7b-beta:free': {
     name: 'Zephyr 7B (Gratuit)',
     description: 'Modèle HuggingFace optimisé',
-    maxTokens: 4096
-  }
+    maxTokens: 4096,
+  },
 } as const;
 
 export class OpenRouterService {
@@ -53,20 +52,25 @@ export class OpenRouterService {
 
   constructor() {
     this.config = {
-     apiKey: process.env.OPENROUTER_API_KEY || '',
-      baseUrl: process.env.NEXT_PUBLIC_OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1',
-      model: process.env.NEXT_PUBLIC_DEFAULT_MODEL || 'qwen/qwen-2.5-72b-instruct:free'
+      apiKey: process.env.OPENROUTER_API_KEY || '',
+      baseUrl: process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1',
+      model: process.env.NEXT_PUBLIC_DEFAULT_MODEL || 'qwen/qwen-2.5-72b-instruct:free',
     };
   }
 
-  async generateText(prompt: string, options?: {
-    model?: string;
-    maxTokens?: number;
-    temperature?: number;
-    systemMessage?: string;
-  }): Promise<string> {
+  async generateText(
+    prompt: string,
+    options?: {
+      model?: string;
+      maxTokens?: number;
+      temperature?: number;
+      systemMessage?: string;
+    }
+  ): Promise<string> {
     if (!this.config.apiKey) {
-      throw new Error('OpenRouter API key not configured. Please add NEXT_PUBLIC_OPENROUTER_API_KEY to your .env.local file');
+      throw new Error(
+        'OpenRouter API key not configured. Please add OPENROUTER_API_KEY to your .env.local file'
+      );
     }
 
     const model = options?.model || this.config.model;
@@ -76,14 +80,14 @@ export class OpenRouterService {
     if (options?.systemMessage) {
       messages.push({
         role: 'system',
-        content: options.systemMessage
+        content: options.systemMessage,
       });
     }
 
     // Message utilisateur
     messages.push({
       role: 'user',
-      content: prompt
+      content: prompt,
     });
 
     const requestBody: OpenRouterRequest = {
@@ -91,24 +95,30 @@ export class OpenRouterService {
       messages,
       max_tokens: options?.maxTokens || 2000,
       temperature: options?.temperature || 0.7,
-      top_p: 1
+      top_p: 1,
     };
 
     try {
       const response = await fetch(`${this.config.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
+          Authorization: `Bearer ${this.config.apiKey}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': window.location.origin,
-          'X-Title': 'Suite d\'écriture NCP'
+          'HTTP-Referer': process.env.VERCEL_URL
+            ? `https://${process.env.VERCEL_URL}`
+            : 'http://localhost:3000',
+          'X-Title': "Suite d'écriture NCP",
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(`OpenRouter API error: ${response.status} - ${errorData.error?.message || response.statusText}`);
+        throw new Error(
+          `OpenRouter API error: ${response.status} - ${
+            errorData.error?.message || response.statusText
+          }`
+        );
       }
 
       const data = await response.json();
@@ -118,7 +128,6 @@ export class OpenRouterService {
       }
 
       return data.choices[0].message.content;
-
     } catch (error) {
       console.error('OpenRouter API error:', error);
       throw error;
@@ -126,16 +135,17 @@ export class OpenRouterService {
   }
 
   // Méthodes spécialisées pour l'écriture créative
-
   async generateStory(prompt: string, genre?: string): Promise<string> {
-    const systemMessage = `Tu es un écrivain professionnel spécialisé dans la création d'histoires ${genre ? `de ${genre}` : 'créatives'}.
+    const systemMessage = `Tu es un écrivain professionnel spécialisé dans la création d'histoires ${
+      genre ? `de ${genre}` : 'créatives'
+    }.
     Écris de manière engageante, avec des détails vivants et un style littéraire de qualité.
     Crée des personnages intéressants et des situations captivantes.`;
 
     return this.generateText(prompt, {
       systemMessage,
       maxTokens: 3000,
-      temperature: 0.8
+      temperature: 0.8,
     });
   }
 
@@ -147,7 +157,7 @@ export class OpenRouterService {
     return this.generateText(prompt, {
       systemMessage,
       maxTokens: 2000,
-      temperature: 0.9
+      temperature: 0.9,
     });
   }
 
@@ -159,7 +169,7 @@ export class OpenRouterService {
     return this.generateText(prompt, {
       systemMessage,
       maxTokens: 4000,
-      temperature: 0.7
+      temperature: 0.7,
     });
   }
 
