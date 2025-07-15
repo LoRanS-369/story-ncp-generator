@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-/* ---------- Helper ---------- */
+/* ---------- Helper : menu déroulant multi-choix ---------- */
 const SelectMulti = ({ label, value, onChange, options }: any) => (
   <div>
     <label className="block text-sm font-medium mb-1">{label}</label>
@@ -31,35 +31,6 @@ const SelectMulti = ({ label, value, onChange, options }: any) => (
   </div>
 );
 
-const TextWithSuggestion = ({ label, value, onChange, placeholder }: any) => {
-  const [loading, setLoading] = useState(false);
-  const suggest = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/openrouter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: `Suggère une idée créative pour : ${label}` }),
-      });
-      const data = await res.json();
-      onChange(data.result?.trim() || '');
-    } catch {
-      alert('Erreur suggestion');
-    } finally {
-      setLoading(false);
-    }
-  };
-  return (
-    <div className="flex flex-col gap-1">
-      <label className="block text-sm font-medium">{label}</label>
-      <Textarea value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="min-h-20" />
-      <Button onClick={suggest} size="sm" variant="outline" disabled={loading}>
-        💡 {loading ? '…' : 'Suggérer'}
-      </Button>
-    </div>
-  );
-};
-
 export default function UltimateNCPGenerator() {
   const [tab, setTab] = useState('story');
 
@@ -74,7 +45,6 @@ export default function UltimateNCPGenerator() {
     commercialGoal: '',
     respectNCP: false,
     seo: false,
-    splitAudio: false,
   });
 
   const [result, setResult] = useState('');
@@ -102,9 +72,9 @@ export default function UltimateNCPGenerator() {
   };
 
   /* ---------- OPTIONS ---------- */
-  const genres = ["Éducation","Original","Classique","Humour","Science-fiction","Space opera","Extra-terrestre","Dystopie","Uchronie","Steampunk","Action","Thriller","Horreur","Réaliste","Biographie","Fiction","Non-fiction","Drame","Mystère","Voyage dans le temps","Bataille","Comédie","Kawaii","Magie","Mecha Battle","Fantasy","Aventure","Vengeance","Samouraï","Ninja","Kpop","Suspense","Guérison","Émotion","Superpouvoirs","Crime","Vie quotidienne","Compétition","Historique","Épique","Guerre","Sports"];
-  const loveOptions = ["Intrigue","Romance légère","Romance intense","Romance complexe","New romance","Dark Romance","SM Romance","BDSM Romance","Passion","Passion amoureuse","Rupture amoureuse","Échangisme","Boys' Love","Girls’ Love","Triangle amoureux","Amour impossible","Première amour","Érotique","Pornographique","Amour torride","Amour toxique","Amour tordu","Amour amical","Sex friend","Amour à distance","Amour virtuel","Amour multiple","Amour interdit","Amour perdu","Amour polyamoureux","Amour asexuel"];
-  const events = ["Difficulté à l’école","Harcèlement","Sauver le monde","Sauver les autres","Rupture amicale","Triangle amoureux","Coup de foudre","Malentendu","Explorer l'inconnu","Éveil du héros","Amnésie","Mystère de l'identité","Travail d'équipe","Voyage dans le temps et l'espace","Bataille fatale","Trahison par la famille","Secret de famille","Événement mystérieux","Ascension du méchant","Civilisation perdue","Monde virtuel","Survie à l'apocalypse","Progression professionnelle","Croissance dans l'adversité","Chasser les rêves","Vie ordinaire","Ment","Enquête sur un événement","Meurtre","Amour perdu et réuni","Test familial","Amour sado-masochiste","Douceur","Développement du personnage","Amélioration des compétences","Retrait","Lutte pour le pouvoir","Guerre des gangs","Poursuite et évasion","Complot politique","Choc des civilisations","Mystère historique","Lutte commerciale","Adieu","Triste fin","Premier amour","Regret irréparable","Gestion d'entreprise","Croissance difficile","Côté obscur de l'industrie","Découverte scientifique","Catastrophe naturelle","Révolution technologique"];
+  const genres = ["Éducation","Original","Classique","Humour","Science-fiction","Space opera","Extra-terrestre","Dystopie","Uchronie","Steampunk","Action","Thriller","Horreur","Réaliste","Biographie","Fiction","Non-fiction","Drame","Mystère","Voyage dans le temps","Bataille","Comédie","Kawaii","Magie","Fantasy","Aventure","Vengeance","Samouraï","Ninja","Suspense","Guérison","Émotion","Superpouvoirs","Crime","Vie quotidienne","Compétition","Historique","Épique","Guerre","Sports"];
+  const loveOptions = ["Intrigue","Romance légère","Romance intense","Romance complexe","Dark Romance","Boys' Love","Girls’ Love","Triangle amoureux","Amour impossible","Érotique","Amour toxique","Amour à distance","Amour virtuel","Amour interdit","Amour perdu","Amour polyamoureux"];
+  const events = ["Sauver le monde","Triangle amoureux","Trahison","Secret de famille","Amour interdit","Développement du personnage","Croissance dans l'adversité","Complot politique","Mystère historique","Révolution technologique"];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
@@ -119,13 +89,12 @@ export default function UltimateNCPGenerator() {
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="story">📖 Histoire</TabsTrigger>
-            <TabsTrigger value="advanced">📋 Paramètres avancés</TabsTrigger>
-            <TabsTrigger value="character">👤 Personnage</TabsTrigger>
+            <TabsTrigger value="advanced">📋 Paramètres</TabsTrigger>
+            <TabsTrigger value="character">👤 Personnages</TabsTrigger>
             <TabsTrigger value="chapter">📚 Chapitres</TabsTrigger>
             <TabsTrigger value="links">🔗 Liens & intrigues</TabsTrigger>
             <TabsTrigger value="locations">📍 Lieux</TabsTrigger>
             <TabsTrigger value="themes">📚 Thèmes</TabsTrigger>
-            <TabsTrigger value="custom">⚙️ IA & Style</TabsTrigger>
           </TabsList>
 
           {/* ONGLET HISTOIRE */}
@@ -133,13 +102,13 @@ export default function UltimateNCPGenerator() {
             <Card>
               <CardHeader><CardTitle>Idée de base</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <TextWithSuggestion label="Titre du livre" value={story.title} onChange={(v) => setStory({ ...story, title: v })} placeholder="Titre" />
-                <TextWithSuggestion label="Idée de départ" value={story.prompt} onChange={(v) => setStory({ ...story, prompt: v })} placeholder="Pitch ou idée de base" />
+                <Textarea value={story.prompt} onChange={(e) => setStory({ ...story, prompt: e.target.value })} placeholder="Pitch ou idée de base" className="min-h-20" />
+                <Input value={story.title} onChange={(e) => setStory({ ...story, title: e.target.value })} placeholder="Titre du livre" />
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* ONGLET AVANCÉ */}
+          {/* ONGLET PARAMÈTRES */}
           <TabsContent value="advanced">
             <Card>
               <CardHeader><CardTitle>📋 Paramètres avancés</CardTitle></CardHeader>
@@ -151,93 +120,16 @@ export default function UltimateNCPGenerator() {
                 <SelectMulti label="Objectif commercial" value={[story.commercialGoal]} onChange={(v) => setStory({ ...story, commercialGoal: v[0] })} options={["Commercialisable","Création pure","Autre"]} />
                 <label className="flex items-center gap-2">
                   <input type="checkbox" checked={story.respectNCP} onChange={(e) => setStory({ ...story, respectNCP: e.target.checked })} />
-                  ✅ Respect du Narrative Context Protocol (NCP)
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" checked={story.splitAudio} onChange={(e) => setStory({ ...story, splitAudio: e.target.checked })} />
-                  🔊 Séparer audio pour plusieurs voix
+                  ✅ Respect du NCP (Narrative Context Protocol)
                 </label>
                 <label className="flex items-center gap-2">
                   <input type="checkbox" checked={story.seo} onChange={(e) => setStory({ ...story, seo: e.target.checked })} />
                   🔍 Optimiser SEO (article blog)
                 </label>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ONGLET PERSONNAGE */}
-          <TabsContent value="character">
-            <Card>
-              <CardHeader><CardTitle>Fiche personnage</CardTitle></CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <TextWithSuggestion label="Nom complet" value={""} onChange={() => {}} placeholder="Nom" />
-                <TextWithSuggestion label="Apparence" value={""} onChange={() => {}} placeholder="Apparence" />
-                <TextWithSuggestion label="Motivation" value={""} onChange={() => {}} placeholder="Motivation" />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ONGLET CHAPITRES */}
-          <TabsContent value="chapter">
-            <Card>
-              <CardHeader><CardTitle>Chapitres</CardTitle></CardHeader>
-              <CardContent>
-                <SelectMulti label="Nombre de chapitres" value={['1']} onChange={() => {}} options={['1','3','5','7','10']} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ONGLET LIENS & INTRIGUES */}
-          <TabsContent value="links">
-            <Card>
-              <CardHeader><CardTitle>Liens & intrigues entre personnages</CardTitle></CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <label className="flex items-center gap-2">
-                  <input type="checkbox" />
-                  ✔️ Conflit de loyauté
+                  <input type="checkbox" checked={story.splitAudio} onChange={(e) => setStory({ ...story, splitAudio: e.target.checked })} />
+                  🔊 Séparer audio pour plusieurs voix
                 </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" />
-                  ✔️ Quête de rédemption
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" />
-                  ✔️ Trahison
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" />
-                  ✔️ Amour interdit
-                </label>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ONGLET LIEUX */}
-          <TabsContent value="locations">
-            <Card>
-              <CardHeader><CardTitle>Lieux des actions</CardTitle></CardContent>
-              <CardContent>
-                <SelectMulti label="Milieux urbains" value={['Ville Moderne']} onChange={() => {}} options={["Ville Moderne","Quartier Historique","Banlieue Résidentielle","Centre Commercial","Ghetto Urbain"]} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ONGLET THÈMES */}
-          <TabsContent value="themes">
-            <Card>
-              <CardHeader><CardTitle>Thèmes des livres</CardTitle></CardContent>
-              <CardContent>
-                <SelectMulti label="Général" value={['Romans']} onChange={() => {}} options={["Romans","Science-fiction","Fantasy","Bandes dessinées","Santé","Sport","Érotique","Professionnel"]} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ONGLET PERSONNALISATION IA */}
-          <TabsContent value="custom">
-            <Card>
-              <CardHeader><CardTitle>Personnalisation IA</CardTitle></CardContent>
-              <CardContent>
-                <SelectMulti label="Niveau de créativité" value={['Équilibré']} onChange={() => {}} options={["Conservateur","Équilibré","Inventif","Expérimental","Traditionnel","Innovant","Classique","Moderne","Avant-Gardiste","Éclectique"]} />
               </CardContent>
             </Card>
           </TabsContent>
