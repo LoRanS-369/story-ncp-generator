@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-/* ---------- Helper : menu déroulant multi-choix ---------- */
+/* ---------- Helper ---------- */
 const SelectMulti = ({ label, value, onChange, options }: any) => (
   <div>
     <label className="block text-sm font-medium mb-1">{label}</label>
@@ -31,7 +31,6 @@ const SelectMulti = ({ label, value, onChange, options }: any) => (
   </div>
 );
 
-/* ---------- Helper : champ texte avec bouton suggestion IA ---------- */
 const TextWithSuggestion = ({ label, value, onChange, placeholder }: any) => {
   const [loading, setLoading] = useState(false);
   const suggest = async () => {
@@ -64,43 +63,18 @@ const TextWithSuggestion = ({ label, value, onChange, placeholder }: any) => {
 export default function UltimateNCPGenerator() {
   const [tab, setTab] = useState('story');
 
-  /* ---------- ÉTAT GLOBAL ---------- */
+  /* ---------- ÉTAT ---------- */
   const [story, setStory] = useState({
     prompt: '',
     title: '',
-    duration: '',
-    chapters: '',
-    tomes: '',
     genre: [] as string[],
     love: [] as string[],
     event: [] as string[],
-    eventType: [] as string[],
-    animals: [] as string[],
-    animalRole: [] as string[],
-    creativity: '',
-    audience: '',
-    ageRange: '',
-    diversity: [] as string[],
-    perspective: [] as string[],
-    style: [] as string[],
-    tone: [] as string[],
-    chronology: '',
-    forbiddenWords: '',
-    creativityLevel: '',
-    authorStyle: '',
-    avoidRepetition: false,
-    narration: [] as string[],
-    ending: [] as string[],
-    cliffhanger: [] as string[],
-    tensionLevel: '',
-    allowDeath: [] as string[],
-    allowSex: [] as string[],
-    opening: [] as string[],
     supportType: '',
     commercialGoal: '',
-    splitAudio: false,
+    respectNCP: false,
     seo: false,
-    respectNCP: false, // ✅ Case NCP
+    splitAudio: false,
   });
 
   const [result, setResult] = useState('');
@@ -132,7 +106,6 @@ export default function UltimateNCPGenerator() {
   const loveOptions = ["Intrigue","Romance légère","Romance intense","Romance complexe","New romance","Dark Romance","SM Romance","BDSM Romance","Passion","Passion amoureuse","Rupture amoureuse","Échangisme","Boys' Love","Girls’ Love","Triangle amoureux","Amour impossible","Première amour","Érotique","Pornographique","Amour torride","Amour toxique","Amour tordu","Amour amical","Sex friend","Amour à distance","Amour virtuel","Amour multiple","Amour interdit","Amour perdu","Amour polyamoureux","Amour asexuel"];
   const events = ["Difficulté à l’école","Harcèlement","Sauver le monde","Sauver les autres","Rupture amicale","Triangle amoureux","Coup de foudre","Malentendu","Explorer l'inconnu","Éveil du héros","Amnésie","Mystère de l'identité","Travail d'équipe","Voyage dans le temps et l'espace","Bataille fatale","Trahison par la famille","Secret de famille","Événement mystérieux","Ascension du méchant","Civilisation perdue","Monde virtuel","Survie à l'apocalypse","Progression professionnelle","Croissance dans l'adversité","Chasser les rêves","Vie ordinaire","Ment","Enquête sur un événement","Meurtre","Amour perdu et réuni","Test familial","Amour sado-masochiste","Douceur","Développement du personnage","Amélioration des compétences","Retrait","Lutte pour le pouvoir","Guerre des gangs","Poursuite et évasion","Complot politique","Choc des civilisations","Mystère historique","Lutte commerciale","Adieu","Triste fin","Premier amour","Regret irréparable","Gestion d'entreprise","Croissance difficile","Côté obscur de l'industrie","Découverte scientifique","Catastrophe naturelle","Révolution technologique"];
 
-  /* ---------- PAGE ACCUEIL UNIFIÉE ---------- */
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       <header className="bg-white border-b shadow-sm">
@@ -147,7 +120,7 @@ export default function UltimateNCPGenerator() {
           <TabsList className="mb-6">
             <TabsTrigger value="story">📖 Histoire</TabsTrigger>
             <TabsTrigger value="advanced">📋 Paramètres avancés</TabsTrigger>
-            <TabsTrigger value="character">👤 Personnages</TabsTrigger>
+            <TabsTrigger value="character">👤 Personnage</TabsTrigger>
             <TabsTrigger value="chapter">📚 Chapitres</TabsTrigger>
             <TabsTrigger value="links">🔗 Liens & intrigues</TabsTrigger>
             <TabsTrigger value="locations">📍 Lieux</TabsTrigger>
@@ -197,9 +170,9 @@ export default function UltimateNCPGenerator() {
             <Card>
               <CardHeader><CardTitle>Fiche personnage</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <TextWithSuggestion label="Nom complet" value={story.title} onChange={(v) => setStory({ ...story, title: v })} placeholder="Nom" />
-                <TextWithSuggestion label="Apparence" value={story.title} onChange={(v) => setStory({ ...story, title: v })} placeholder="Apparence" />
-                <TextWithSuggestion label="Motivation" value={story.title} onChange={(v) => setStory({ ...story, title: v })} placeholder="Motivation" />
+                <TextWithSuggestion label="Nom complet" value={""} onChange={() => {}} placeholder="Nom" />
+                <TextWithSuggestion label="Apparence" value={""} onChange={() => {}} placeholder="Apparence" />
+                <TextWithSuggestion label="Motivation" value={""} onChange={() => {}} placeholder="Motivation" />
               </CardContent>
             </Card>
           </TabsContent>
@@ -242,7 +215,7 @@ export default function UltimateNCPGenerator() {
           {/* ONGLET LIEUX */}
           <TabsContent value="locations">
             <Card>
-              <CardHeader><CardTitle>Lieux des actions</CardTitle></CardHeader>
+              <CardHeader><CardTitle>Lieux des actions</CardTitle></CardContent>
               <CardContent>
                 <SelectMulti label="Milieux urbains" value={['Ville Moderne']} onChange={() => {}} options={["Ville Moderne","Quartier Historique","Banlieue Résidentielle","Centre Commercial","Ghetto Urbain"]} />
               </CardContent>
@@ -252,7 +225,7 @@ export default function UltimateNCPGenerator() {
           {/* ONGLET THÈMES */}
           <TabsContent value="themes">
             <Card>
-              <CardHeader><CardTitle>Thèmes des livres</CardTitle></CardHeader>
+              <CardHeader><CardTitle>Thèmes des livres</CardTitle></CardContent>
               <CardContent>
                 <SelectMulti label="Général" value={['Romans']} onChange={() => {}} options={["Romans","Science-fiction","Fantasy","Bandes dessinées","Santé","Sport","Érotique","Professionnel"]} />
               </CardContent>
@@ -278,7 +251,7 @@ export default function UltimateNCPGenerator() {
 
           {result && (
             <Card className="mt-6">
-              <CardHeader><CardTitle>Résultat généré</CardTitle></CardHeader>
+              <CardHeader><CardTitle>Résultat généré</CardTitle></CardContent>
               <CardContent>
                 <pre className="whitespace-pre-wrap text-sm">{result}</pre>
               </CardContent>
