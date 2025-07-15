@@ -53,7 +53,7 @@ export class OpenRouterService {
 
   constructor() {
     this.config = {
-      apiKey: process.env.NEXT_PUBLIC_OPENROUTER_API_KEY || '',
+     apiKey: process.env.OPENROUTER_API_KEY || '',
       baseUrl: process.env.NEXT_PUBLIC_OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1',
       model: process.env.NEXT_PUBLIC_DEFAULT_MODEL || 'qwen/qwen-2.5-72b-instruct:free'
     };
