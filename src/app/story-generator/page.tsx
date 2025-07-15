@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-/* ---------- Helper : menu déroulant multi-choix ---------- */
+/* ---------- Helper ---------- */
 const SelectMulti = ({ label, value, onChange, options }: any) => (
   <div>
     <label className="block text-sm font-medium mb-1">{label}</label>
@@ -31,7 +31,6 @@ const SelectMulti = ({ label, value, onChange, options }: any) => (
   </div>
 );
 
-/* ---------- Helper : champ texte avec bouton suggestion IA ---------- */
 const TextWithSuggestion = ({ label, value, onChange, placeholder }: any) => {
   const [loading, setLoading] = useState(false);
   const suggest = async () => {
@@ -68,39 +67,76 @@ export default function UltimateNCPGenerator() {
   const [story, setStory] = useState({
     prompt: '',
     title: '',
-    duration: '',
-    chapters: '',
-    tomes: '',
     genre: [] as string[],
     love: [] as string[],
     event: [] as string[],
-    eventType: [] as string[],
-    animals: [] as string[],
-    animalRole: [] as string[],
-    creativity: '',
-    audience: '',
-    ageRange: '',
-    diversity: [] as string[],
-    perspective: [] as string[],
-    style: [] as string[],
-    tone: [] as string[],
-    chronology: '',
-    forbiddenWords: '',
-    creativityLevel: '',
-    authorStyle: '',
-    avoidRepetition: false,
-    narration: [] as string[],
-    ending: [] as string[],
-    cliffhanger: [] as string[],
-    tensionLevel: '',
-    allowDeath: [] as string[],
-    allowSex: [] as string[],
-    opening: [] as string[],
     supportType: '',
     commercialGoal: '',
-    splitAudio: false,
+    respectNCP: false,
     seo: false,
-    respectNCP: false, // ✅ Case NCP
+    splitAudio: false,
+  });
+
+  const [character, setCharacter] = useState({
+    name: '',
+    age: '',
+    appearance: '',
+    personality: '',
+    backstory: '',
+    motivation: '',
+    skills: '',
+    fatalFlaw: '',
+    desire: '',
+    fear: '',
+  });
+
+  const [chapters, setChapters] = useState({
+    count: '1',
+    structure: '',
+    pacing: '',
+    midpoint: '',
+    climax: '',
+    resolution: '',
+    cliffhangers: false,
+    flashbacks: false,
+    multiTimeline: false,
+  });
+
+  const [links, setLinks] = useState({
+    loyaltyConflict: false,
+    redemptionQuest: false,
+    betrayal: false,
+    familySecret: false,
+    forbiddenLove: false,
+    powerCorruption: false,
+    survival: false,
+    rivalry: false,
+    truthQuest: false,
+  });
+
+  const [locations, setLocations] = useState({
+    urban: [] as string[],
+    rural: [] as string[],
+    coastal: [] as string[],
+    fantasy: [] as string[],
+    historical: [] as string[],
+    futuristic: [] as string[],
+  });
+
+  const [themes, setThemes] = useState({
+    general: [] as string[],
+    sport: [] as string[],
+    erotic: [] as string[],
+    professional: [] as string[],
+  });
+
+  const [customization, setCustomization] = useState({
+    creativityLevel: '',
+    style: [] as string[],
+    tone: [] as string[],
+    death: [] as string[],
+    sex: [] as string[],
+    opening: [] as string[],
   });
 
   const [result, setResult] = useState('');
@@ -113,7 +149,7 @@ export default function UltimateNCPGenerator() {
   const generateAll = async () => {
     if (!story.prompt) return alert('Entrez une idée');
     setLoading(true);
-    const payload = { story };
+    const payload = { story, character, chapters, links, locations, themes, customization };
     try {
       const res = await fetch('/api/openrouter', {
         method: 'POST',
@@ -128,11 +164,10 @@ export default function UltimateNCPGenerator() {
   };
 
   /* ---------- OPTIONS ---------- */
-  const genres = ["Éducation","Original","Classique","Humour","Science-fiction","Space opera","Extra-terrestre","Dystopie","Uchronie","Steampunk","Action","Thriller","Horreur","Réaliste","Biographie","Fiction","Non-fiction","Drame","Mystère","Voyage dans le temps","Bataille","Comédie","Kawaii","Magie","Mecha Battle","Fantasy","Aventure","Vengeance","Samouraï","Ninja","Kpop","Suspense","Guérison","Émotion","Superpouvoirs","Crime","Vie quotidienne","Compétition","Historique","Épique","Guerre","Sports"];
-  const loveOptions = ["Intrigue","Romance légère","Romance intense","Romance complexe","New romance","Dark Romance","SM Romance","BDSM Romance","Passion","Passion amoureuse","Rupture amoureuse","Échangisme","Boys' Love","Girls’ Love","Triangle amoureux","Amour impossible","Première amour","Érotique","Pornographique","Amour torride","Amour toxique","Amour tordu","Amour amical","Sex friend","Amour à distance","Amour virtuel","Amour multiple","Amour interdit","Amour perdu","Amour polyamoureux","Amour asexuel"];
+  const genres = ["Éducation","Original","Classique","Humour","Science-fiction","Space opera","Extra-terrestre","Dystopie","Uchronie","Steampunk","Action","Thriller","Horreur","Réaliste","Biographie","Fiction","Non-fiction","Drame","Mystère","Voyage dans le temps","Bataille","Comédie","Kawaii","Magie","Fantasy","Aventure","Vengeance","Samouraï","Ninja","Suspense","Guérison","Émotion","Superpouvoirs","Crime","Vie quotidienne","Compétition","Historique","Épique","Guerre","Sports"];
+  const loveOptions = ["Intrigue","Romance légère","Romance intense","Romance complexe","Dark Romance","Boys' Love","Girls’ Love","Triangle amoureux","Amour impossible","Première amour","Érotique","Pornographique","Amour torride","Amour toxique","Amour tordu","Amour amical","Sex friend","Amour à distance","Amour virtuel","Amour multiple","Amour interdit","Amour perdu","Amour polyamoureux","Amour asexuel"];
   const events = ["Difficulté à l’école","Harcèlement","Sauver le monde","Sauver les autres","Rupture amicale","Triangle amoureux","Coup de foudre","Malentendu","Explorer l'inconnu","Éveil du héros","Amnésie","Mystère de l'identité","Travail d'équipe","Voyage dans le temps et l'espace","Bataille fatale","Trahison par la famille","Secret de famille","Événement mystérieux","Ascension du méchant","Civilisation perdue","Monde virtuel","Survie à l'apocalypse","Progression professionnelle","Croissance dans l'adversité","Chasser les rêves","Vie ordinaire","Ment","Enquête sur un événement","Meurtre","Amour perdu et réuni","Test familial","Amour sado-masochiste","Douceur","Développement du personnage","Amélioration des compétences","Retrait","Lutte pour le pouvoir","Guerre des gangs","Poursuite et évasion","Complot politique","Choc des civilisations","Mystère historique","Lutte commerciale","Adieu","Triste fin","Premier amour","Regret irréparable","Gestion d'entreprise","Croissance difficile","Côté obscur de l'industrie","Découverte scientifique","Catastrophe naturelle","Révolution technologique"];
 
-  /* ---------- PAGE ACCUEIL UNIFIÉE ---------- */
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       <header className="bg-white border-b shadow-sm">
@@ -152,7 +187,6 @@ export default function UltimateNCPGenerator() {
             <TabsTrigger value="links">🔗 Liens & intrigues</TabsTrigger>
             <TabsTrigger value="locations">📍 Lieux</TabsTrigger>
             <TabsTrigger value="themes">📚 Thèmes</TabsTrigger>
-            <TabsTrigger value="custom">⚙️ IA & Style</TabsTrigger>
           </TabsList>
 
           {/* ONGLET HISTOIRE */}
@@ -161,7 +195,7 @@ export default function UltimateNCPGenerator() {
               <CardHeader><CardTitle>Idée de base</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <TextWithSuggestion label="Titre du livre" value={story.title} onChange={(v) => setStory({ ...story, title: v })} placeholder="Titre" />
-                <TextWithSuggestion label="Idée de départ" value={story.prompt} onChange={(v) => setStory({ ...story, prompt: v })} placeholder="Pitch ou idée de base" />
+                <Textarea value={story.prompt} onChange={(e) => setStory({ ...story, prompt: e.target.value })} placeholder="Pitch ou idée de base" className="min-h-20" />
               </CardContent>
             </Card>
           </TabsContent>
@@ -178,15 +212,15 @@ export default function UltimateNCPGenerator() {
                 <SelectMulti label="Objectif commercial" value={[story.commercialGoal]} onChange={(v) => setStory({ ...story, commercialGoal: v[0] })} options={["Commercialisable","Création pure","Autre"]} />
                 <label className="flex items-center gap-2">
                   <input type="checkbox" checked={story.respectNCP} onChange={(e) => setStory({ ...story, respectNCP: e.target.checked })} />
-                  ✅ Respect du Narrative Context Protocol (NCP)
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" checked={story.splitAudio} onChange={(e) => setStory({ ...story, splitAudio: e.target.checked })} />
-                  🔊 Séparer audio pour plusieurs voix
+                  ✅ Respect du NCP
                 </label>
                 <label className="flex items-center gap-2">
                   <input type="checkbox" checked={story.seo} onChange={(e) => setStory({ ...story, seo: e.target.checked })} />
-                  🔍 Optimiser SEO (article blog)
+                  🔍 Optimiser SEO
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" checked={story.splitAudio} onChange={(e) => setStory({ ...story, splitAudio: e.target.checked })} />
+                  🔊 Séparer audio
                 </label>
               </CardContent>
             </Card>
@@ -197,74 +231,12 @@ export default function UltimateNCPGenerator() {
             <Card>
               <CardHeader><CardTitle>Fiche personnage</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <TextWithSuggestion label="Nom complet" value={story.title} onChange={(v) => setStory({ ...story, title: v })} placeholder="Nom" />
-                <TextWithSuggestion label="Apparence" value={story.title} onChange={(v) => setStory({ ...story, title: v })} placeholder="Apparence" />
-                <TextWithSuggestion label="Motivation" value={story.title} onChange={(v) => setStory({ ...story, title: v })} placeholder="Motivation" />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ONGLET CHAPITRES */}
-          <TabsContent value="chapter">
-            <Card>
-              <CardHeader><CardTitle>Chapitres</CardTitle></CardHeader>
-              <CardContent>
-                <SelectMulti label="Nombre de chapitres" value={['1']} onChange={() => {}} options={['1','3','5','7','10']} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ONGLET LIENS & INTRIGUES */}
-          <TabsContent value="links">
-            <Card>
-              <CardHeader><CardTitle>Liens & intrigues entre personnages</CardTitle></CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" />
-                  ✔️ Conflit de loyauté
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" />
-                  ✔️ Quête de rédemption
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" />
-                  ✔️ Trahison
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" />
-                  ✔️ Amour interdit
-                </label>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ONGLET LIEUX */}
-          <TabsContent value="locations">
-            <Card>
-              <CardHeader><CardTitle>Lieux des actions</CardTitle></CardHeader>
-              <CardContent>
-                <SelectMulti label="Milieux urbains" value={['Ville Moderne']} onChange={() => {}} options={["Ville Moderne","Quartier Historique","Banlieue Résidentielle","Centre Commercial","Ghetto Urbain"]} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ONGLET THÈMES */}
-          <TabsContent value="themes">
-            <Card>
-              <CardHeader><CardTitle>Thèmes des livres</CardTitle></CardHeader>
-              <CardContent>
-                <SelectMulti label="Général" value={['Romans']} onChange={() => {}} options={["Romans","Science-fiction","Fantasy","Bandes dessinées","Santé","Sport","Érotique","Professionnel"]} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ONGLET PERSONNALISATION IA */}
-          <TabsContent value="custom">
-            <Card>
-              <CardHeader><CardTitle>Personnalisation IA</CardTitle></CardContent>
-              <CardContent>
-                <SelectMulti label="Niveau de créativité" value={['Équilibré']} onChange={() => {}} options={["Conservateur","Équilibré","Inventif","Expérimental","Traditionnel","Innovant","Classique","Moderne","Avant-Gardiste","Éclectique"]} />
+                <Input value={character.name} onChange={(e) => setCharacter({ ...character, name: e.target.value })} placeholder="Nom complet" />
+                <Input value={character.age} onChange={(e) => setCharacter({ ...character, age: e.target.value })} placeholder="Âge" />
+                <Textarea value={character.appearance} onChange={(e) => setCharacter({ ...character, appearance: e.target.value })} placeholder="Apparence physique" className="min-h-20" />
+                <Textarea value={character.personality} onChange={(e) => setCharacter({ ...character, personality: e.target.value })} placeholder="Traits de personnalité" className="min-h-20" />
+                <Textarea value={character.motivation} onChange={(e) => setCharacter({ ...character, motivation: e.target.value })} placeholder="Motivation profonde" className="min-h-20" />
+                <Textarea value={character.skills} onChange={(e) => setCharacter({ ...character, skills: e.target.value })} placeholder="Compétences spécialisées" className="min-h-20" />
               </CardContent>
             </Card>
           </TabsContent>
