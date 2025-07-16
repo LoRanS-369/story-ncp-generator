@@ -24,29 +24,34 @@ const SelectMulti = ({ label, value, onChange, options }: any) => (
       </SelectTrigger>
       <SelectContent>
         {options.map((o: string) => (
-          <SelectItem key={o} value={o}>
-            {o}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  </div>
-);
+const SelectMulti = ({ label, value, onChange, options }: any) => {
+  // Garantit que la valeur est toujours un tableau de strings
+  const safeValue = Array.isArray(value) ? value : value ? [value] : [];
 
-const TextWithSuggestion = ({ label, value, onChange, placeholder }: any) => {
-  const [loading, setLoading] = useState(false);
-  const suggest = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/openrouter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: `Suggère une courte idée pour : ${label}`, maxTokens: 60 }),
-      });
-      const data = await res.json();
-      onChange(data.result?.trim() || '');
-    } catch {
-      alert('Erreur suggestion');
+  return (
+    <div>
+      <label className="block text-sm font-medium mb-1">{label}</label>
+      <Select
+        value={safeValue.join(',')}
+        onValueChange={(v) => {
+          const arr = v ? v.split(',').filter(Boolean) : [];
+          onChange(arr.length === 1 ? arr[0] : arr);
+        }}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder={`Sélectionner ${label.toLowerCase()}`} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((o: string) => (
+            <SelectItem key={o} value={o}>
+              {o}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+};
     } finally {
       setLoading(false);
     }
