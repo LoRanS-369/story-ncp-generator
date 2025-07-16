@@ -1,6 +1,7 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+import ReactFlow, { MiniMap, Controls, Background } from 'reactflow';
+import 'reactflow/dist/style.css';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -206,32 +207,38 @@ export default function UltimateNCPGenerator() {
 
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
-  const [mindMapNodes, setMindMapNodes] = useState({
-    text: 'Histoire',
-    children: [],
-  });
+  const [nodes, setNodes] = useState<any[]>([]);
+const [edges, setEdges] = useState<any[]>([]);
 
-  useEffect(() => {
-    const root = { text: 'Histoire', children: [] as any[] };
-    const selectedLinks = Object.entries(links)
-      .filter(([, value]) => value)
-      .map(([key]) => key);
+useEffect(() => {
+  const initialNodes = [
+    { id: '1', position: { x: 250, y: 5 }, data: { label: 'Histoire' } },
+  ];
 
-    if (selectedLinks.length > 0) {
-      const intriguesNode = { text: 'Intrigues', children: [] as any[] };
-      selectedLinks.forEach((link) => {
-        intriguesNode.children.push({ text: link.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase()) });
-      });
-      root.children.push(intriguesNode);
-    }
+  const selectedLinks = Object.entries(links)
+    .filter(([, value]) => value)
+    .map(([key]) => key);
 
-    if (character.name) {
-      const characterNode = { text: `Personnage: ${character.name}`, children: [] as any[] };
-      root.children.push(characterNode);
-    }
+  if (selectedLinks.length > 0) {
+    initialNodes.push({ id: '2', position: { x: 250, y: 100 }, data: { label: 'Intrigues' } });
+    initialNodes.push(...selectedLinks.map((link, i) => ({
+      id: `link-${i}`,
+      position: { x: i * 150, y: 200 },
+      data: { label: link.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase()) },
+    })));
+    setEdges([
+      { id: 'e1-2', source: '1', target: '2' },
+      ...selectedLinks.map((link, i) => ({ id: `e2-link-${i}`, source: '2', target: `link-${i}` })),
+    ]);
+  }
 
-    setMindMapNodes(root);
-  }, [links, character.name]);
+  if (character.name) {
+    initialNodes.push({ id: '3', position: { x: 500, y: 100 }, data: { label: `Personnage: ${character.name}` } });
+    setEdges((eds) => [...eds, { id: 'e1-3', source: '1', target: '3' }]);
+  }
+
+  setNodes(initialNodes);
+}, [links, character.name]);
 
   /* ---------- UTILS ---------- */
   const handleMulti = (setter: any, key: string) => (v: string) =>
@@ -536,9 +543,17 @@ export default function UltimateNCPGenerator() {
               </CardContent>
             </Card>
             <Card className="mt-6">
-              <CardHeader><CardTitle>Mind Map des intrigues</CardTitle></CardHeader>
-              <CardContent>
-                <Mindmap nodes={mindMapNodes} />
+  <CardHeader><CardTitle>Mind Map des intrigues</CardTitle></CardHeader>
+  <CardContent>
+    <div style={{ height: '500px' }}>
+      <ReactFlow nodes={nodes} edges={edges}>
+        <MiniMap />
+        <Controls />
+        <Background />
+      </ReactFlow>
+    </div>
+  </CardContent>
+</Card>
               </CardContent>
             </Card>
           </TabsContent>
