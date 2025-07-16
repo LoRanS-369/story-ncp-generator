@@ -62,7 +62,6 @@ const TextWithSuggestion = ({ label, value, onChange, placeholder }: any) => {
   );
 };
 4
-const Mindmap = dynamic(() => import('react-mindmap'), { ssr: false });
 export default function UltimateNCPGenerator() {
   const [tab, setTab] = useState('story');
 
