@@ -85,6 +85,7 @@ export default function UltimateNCPGenerator() {
     creativityLevel: '',
     authorStyle: '',
     avoidRepetition: false,
+    customStyle: '',
     narration: [] as string[],
     ending: [] as string[],
     cliffhanger: [] as string[],
@@ -150,6 +151,8 @@ export default function UltimateNCPGenerator() {
     globalArc: [] as string[],
     arcType: [] as string[],
     timelineStyle: '',
+    scenesPerChapter: '',
+    acts: '',
   });
 
   const [links, setLinks] = useState({
@@ -269,7 +272,6 @@ export default function UltimateNCPGenerator() {
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="story">📖 Histoire</TabsTrigger>
-            <TabsTrigger value="advanced">📋 Paramètres</TabsTrigger>
             <TabsTrigger value="character">👤 Personnage</TabsTrigger>
             <TabsTrigger value="chapter">📚 Chapitres</TabsTrigger>
             <TabsTrigger value="links">🔗 Liens & intrigues</TabsTrigger>
@@ -305,6 +307,37 @@ export default function UltimateNCPGenerator() {
                   <input type="checkbox" checked={story.seo} onChange={(e) => setStory({ ...story, seo: e.target.checked })} />
                   Optimiser SEO (article blog)
                 </label>
+                <SelectMulti
+                  label="Style narratif"
+                  value={story.narration}
+                  onChange={handleMulti(setStory, 'narration')}
+                  options={[
+                    'Narratif classique',
+                    'Descriptif',
+                    'Dialogué',
+                    'Monologue intérieur',
+                    'Stream of consciousness',
+                    'Épistolaire',
+                    'Journal intime',
+                    'Chronique',
+                  ]}
+                />
+                <SelectMulti
+                  label="Type de Récit"
+                  value={story.eventType}
+                  onChange={handleMulti(setStory, 'eventType')}
+                  options={[
+                    'Récit interactif',
+                    'Récit immersif',
+                    'Récit poétique',
+                    'Récit lyrique',
+                    'Récit dramatique',
+                    'Récit humoristique',
+                    'Récit satirique',
+                    'Récit ironique',
+                    'Récit tragique',
+                  ]}
+                />
               </CardContent>
             </Card>
           </TabsContent>
@@ -353,10 +386,73 @@ export default function UltimateNCPGenerator() {
             <Card>
               <CardHeader><CardTitle>Planification des chapitres</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <SelectMulti label="Nombre de chapitres" value={[chapters.count]} onChange={(v) => setChapters({ ...chapters, count: v[0] })} options={["1","3","5","7","10"]} />
+                <SelectMulti
+                  label="Longueur de l'histoire"
+                  value={[story.duration]}
+                  onChange={(v) => setStory({ ...story, duration: v[0] })}
+                  options={[
+                    'Micro Fiction (100 à 500 mots)',
+                    'Courte Nouvelle (1000-2500 mots)',
+                    'Moyenne Nouvelle (2501-5000 mots)',
+                    'Longue Nouvelle (5001-7500 mots)',
+                    'Roman court (7501-10 000 mots)',
+                    'Roman Moyen (10 001-30 000 mots)',
+                    'Roman Long (30 001+ mots)',
+                  ]}
+                />
+                <div>
+                  <label className="block text-sm font-medium mb-1">Style narratif</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input
+                      type="number"
+                      placeholder="Scènes par Chapitre"
+                      onChange={(e) => setChapters({ ...chapters, scenesPerChapter: e.target.value })}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Nombre de Chapitres"
+                      value={chapters.count}
+                      onChange={(e) => setChapters({ ...chapters, count: e.target.value })}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Nombre d'Actes"
+                      onChange={(e) => setChapters({ ...chapters, acts: e.target.value })}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Nombre de Tomes"
+                      onChange={(e) => setStory({ ...story, tomes: e.target.value })}
+                    />
+                  </div>
+                </div>
                 <SelectMulti label="Structure" value={[chapters.structure]} onChange={(v) => setChapters({ ...chapters, structure: v[0] })} options={["Acte 3","Acte 5","Hero’s Journey","Freytag","Save the Cat!"]} />
                 <SelectMulti label="Pacing" value={[chapters.pacing]} onChange={(v) => setChapters({ ...chapters, pacing: v[0] })} options={["Lent","Modéré","Rapide","Variable"]} />
-                <SelectMulti label="Timeline style" value={[chapters.timelineStyle]} onChange={(v) => setChapters({ ...chapters, timelineStyle: v[0] })} options={["Linéaire","Non linéaire","Flashbacks","Récits parallèles","Complexe","Imbriqués","Sauts temporels"]} />
+                <SelectMulti
+                  label="Timeline style"
+                  value={[chapters.timelineStyle]}
+                  onChange={(v) => setChapters({ ...chapters, timelineStyle: v[0] })}
+                  options={[
+                    'Récit Linéaire',
+                    'Récit Non linéaire',
+                    'Flashbacks',
+                    'Anticipations',
+                    'Récit enchâssé',
+                    'Timelines parallèles',
+                    'Sauts temporels',
+                    'Boucles temporelles',
+                    'Récit circulaire',
+                    'Récit en spirale',
+                    'Structure en miroir',
+                    'Structure en actes',
+                    'Structure pyramidale',
+                    'Structure en cascade',
+                    'Structure modulaire',
+                    'Structure fragmentée',
+                    'Structure kaléidoscopique',
+                    'Structure labyrinthique',
+                  ]}
+                />
                 <SelectMulti label="Global Arc" value={chapters.globalArc} onChange={handleMulti(setChapters, 'globalArc')} options={["Voyage du Héros","Chute et Rédemption","Quête","Transformation","Découverte de Soi","Révolte","Survie","Ascension et Chute","Quête de Vérité","Réconciliation"]} />
                 <SelectMulti label="Arc type" value={chapters.arcType} onChange={handleMulti(setChapters, 'arcType')} options={["Arc principal","Arc secondaire","Sous-arc"]} />
                 <TextWithSuggestion label="Twist du milieu" value={chapters.midpoint} onChange={(v) => setChapters({ ...chapters, midpoint: v })} placeholder="Twist central" />
@@ -433,11 +529,75 @@ export default function UltimateNCPGenerator() {
               <CardHeader><CardTitle>Personnalisation IA</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <SelectMulti label="Niveau de créativité" value={[customization.creativityLevel]} onChange={(v) => setCustomization({ ...customization, creativityLevel: v[0] })} options={creativityLevels} />
-                <SelectMulti label="Style d’écriture" value={customization.style} onChange={handleMulti(setCustomization, 'style')} options={styles} />
+                <SelectMulti
+                  label="Style d’écriture"
+                  value={customization.style}
+                  onChange={handleMulti(setCustomization, 'style')}
+                  options={[
+                    'Sérieux',
+                    'Humoristique',
+                    'Ironique',
+                    'Sarcastique',
+                    'Mélancolique',
+                    'Optimiste',
+                    'Pessimiste',
+                    'Neutre',
+                    'Passionné',
+                    'Réfléchi',
+                    'Dramatique',
+                    'Comique',
+                    'Tragique',
+                    'Romantique',
+                    'Sexy',
+                    'Mystérieux',
+                    'Suspense',
+                    'Émotionnel',
+                    'Philosophique',
+                    'Politique',
+                    'Social',
+                    'Culturel',
+                    'Historique',
+                    'Scientifique',
+                    'Fantastique',
+                    'Horrifique',
+                    'Érotique',
+                    'Pornographique',
+                    'Éducationnel',
+                    'Inspirant',
+                    'Motivant',
+                    'Révélateur',
+                    'Provocateur',
+                    'Révolutionnaire',
+                    'Traditionnel',
+                    'Moderne',
+                    'Classique',
+                    'Avant-gardiste',
+                    'Expérimental',
+                    'Toxique',
+                  ]}
+                />
                 <SelectMulti label="Ton" value={customization.tone} onChange={handleMulti(setCustomization, 'tone')} options={tones} />
                 <SelectMulti label="Types de mort" value={customization.death} onChange={handleMulti(setCustomization, 'death')} options={["Mort héroïque","Sacrifice","Trahison mortelle","Mort inattendue","Mort symbolique","Mort tragique","Mort mystérieuse","Mort en combat","Mort par maladie","Mort par accident"]} />
                 <SelectMulti label="Types de sexe" value={customization.sex} onChange={handleMulti(setCustomization, 'sex')} options={["Scènes de séduction","Scènes d'amour","Scènes érotiques","Scènes de passion","Scènes de désir","Scènes de tentative","Scènes de rencontre","Scènes de relation interdite","Scènes de relation complexe"]} />
                 <SelectMulti label="Phrases d’ouverture" value={customization.opening} onChange={handleMulti(setCustomization, 'opening')} options={["Mystérieuse","Intrigante","Dramatique","Poétique","Humouristique","Émotionnelle","Suspense","Réfléchie","Descriptive","Inspirante"]} />
+                <Input
+                  placeholder="Style d'auteur à imiter"
+                  value={story.authorStyle}
+                  onChange={(e) => setStory({ ...story, authorStyle: e.target.value })}
+                />
+                <Textarea
+                  placeholder="Mon style d’écriture (2000 caractères max)"
+                  maxLength={2000}
+                  onChange={(e) => setStory({ ...story, customStyle: e.target.value })}
+                />
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={story.avoidRepetition}
+                    onChange={(e) => setStory({ ...story, avoidRepetition: e.target.checked })}
+                  />
+                  Éviter les répétitions
+                </label>
               </CardContent>
             </Card>
           </TabsContent>
