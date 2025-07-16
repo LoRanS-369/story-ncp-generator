@@ -25,9 +25,7 @@ const SelectMulti = ({ label, value, onChange, options }: any) => (
       <SelectContent>
         {options.map((o: string) => (
 const SelectMulti = ({ label, value, onChange, options }: any) => {
-  // Garantit que la valeur est toujours un tableau de strings
   const safeValue = Array.isArray(value) ? value : value ? [value] : [];
-
   return (
     <div>
       <label className="block text-sm font-medium mb-1">{label}</label>
