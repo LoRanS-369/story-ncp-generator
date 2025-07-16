@@ -1,3 +1,5 @@
+bon il semblerait que je n'arrive pas à sélectionner la totalité des lignes "select trigger" à modifier. Je te copie l'intégralité du code de la page pour que tu me fasse toutes les modifications toi même : Merci d'avance ::
+
 'use client';
 
 import ReactFlow, { MiniMap, Controls, Background } from 'reactflow';
