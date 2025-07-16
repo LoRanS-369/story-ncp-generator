@@ -11,35 +11,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-/* ---------- Helper : VisibleSelect (solution robuste) ---------- */
-const VisibleSelect = ({ label, value, onChange, options }: any) => {
-  // Gestion de l'affichage
-  const displayText = Array.isArray(value) 
-    ? value.join(', ') 
+/* ---------- Helper : SelectMulti ultra-simple ---------- */
+const SelectMulti = ({ label, value, onChange, options }: any) => {
+  // Texte à afficher
+  const displayText = Array.isArray(value)
+    ? value.join(', ')
     : (value || '');
-
-  // Gestion de la sélection
-  const handleSelect = (selectedValue: string) => {
-    onChange(selectedValue);
-  };
 
   return (
     <div>
       <label className="block text-sm font-medium mb-1">{label}</label>
-      <div className="relative">
-        <Select value={displayText} onValueChange={handleSelect}>
-          <SelectTrigger className="text-black bg-white dark:text-white dark:bg-gray-800">
-            <span>{displayText || `Sélectionner ${label.toLowerCase()}`}</span>
-          </SelectTrigger>
-          <SelectContent className="text-black bg-white dark:text-white dark:bg-gray-800 max-h-60 overflow-y-auto">
-            {options.map((option: string) => (
-              <SelectItem key={option} value={option}>
-                {option}
+      <Select
+        value={Array.isArray(value) ? value.join(',') : value}
+        onValueChange={(v) => {
+          const arr = v ? v.split(',').filter(Boolean) : [];
+          onChange(arr.length === 1 ? arr[0] : arr);
+        }}
+      >
+        <SelectTrigger className="text-black bg-white dark:text-white dark:bg-gray-800">
+          <span>{displayText || `Sélectionner ${label.toLowerCase()}`}</span>
+        </SelectTrigger>
+        <SelectContent className="text-black bg-white dark:text-white dark:bg-gray-800">
+          {options.map((o: string) => (
+            <SelectItem key={o} value={o}>
+              {o}
             </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 };
