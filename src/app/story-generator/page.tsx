@@ -101,25 +101,6 @@ const SelectMulti = ({ label, value, onChange, options }) => {
   );
 };
 
-/* ---------- FONCTION UTILITAIRE CORRIGÉE ---------- */
-const handleMulti = (setter, key) => (values) => {
-  // Normaliser les valeurs reçues
-  const normalizedValues = Array.isArray(values) ? values : (values ? [values] : []);
-  
-  setter((prev) => ({
-    ...prev,
-    [key]: normalizedValues
-  }));
-};
-
-// Alternative plus simple si vous voulez gérer directement dans les composants
-const handleSimpleMulti = (setter, key) => (values) => {
-  setter((prev) => ({
-    ...prev,
-    [key]: values
-  }));
-};
-
 /* ---------- Helper : TextWithSuggestion ---------- */
 const TextWithSuggestion = ({ label, value, onChange, placeholder }: any) => {
   const [loading, setLoading] = useState(false);
