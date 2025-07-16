@@ -66,4 +66,13 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* ✅ Fix visuel pour les menus déroulants Shadcn / Radix */
+  [data-radix-select-content] [role="option"] {
+    @apply text-black dark:text-white;
+  }
+
+  [data-radix-select-trigger] span {
+    @apply text-black dark:text-white;
+  }
 }
