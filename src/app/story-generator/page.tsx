@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import Mindmap from '@/components/mindmap';
 
 /* ---------- Helper ---------- */
 const SelectMulti = ({ label, value, onChange, options }: any) => (
@@ -60,7 +60,8 @@ const TextWithSuggestion = ({ label, value, onChange, placeholder }: any) => {
     </div>
   );
 };
-
+4
+const Mindmap = dynamic(() => import('react-mindmap'), { ssr: false });
 export default function UltimateNCPGenerator() {
   const [tab, setTab] = useState('story');
 
