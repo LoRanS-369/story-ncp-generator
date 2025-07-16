@@ -1,6 +1,6 @@
 'use client';
 
-import ReactFlow, { MiniMap, Controls, Background } from 'reactflow';
+import ReactFlow, { MiniMap, Controls, Background } from 'reactflow'
 import 'reactflow/dist/style.css';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -541,7 +541,7 @@ useEffect(() => {
                 <TextWithSuggestion label="Arbre généalogique" value={links.genealogy} onChange={(v) => setLinks({ ...links, genealogy: v })} placeholder="Arbre généalogique" />
               </CardContent>
             </Card>
-            <Card className="mt-6">
+           <Card className="mt-6">
   <CardHeader><CardTitle>Mind Map des intrigues</CardTitle></CardHeader>
   <CardContent>
     <div style={{ height: '500px' }}>
@@ -551,8 +551,6 @@ useEffect(() => {
         <Background />
       </ReactFlow>
     </div>
-  </CardContent>
-</Card>
               </CardContent>
             </Card>
           </TabsContent>
