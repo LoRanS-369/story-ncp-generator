@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Mindmap from 'react-mindmap';
 
 /* ---------- Helper ---------- */
 const SelectMulti = ({ label, value, onChange, options }: any) => (
@@ -204,6 +205,32 @@ export default function UltimateNCPGenerator() {
 
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
+  const [mindMapNodes, setMindMapNodes] = useState({
+    text: 'Histoire',
+    children: [],
+  });
+
+  useEffect(() => {
+    const root = { text: 'Histoire', children: [] as any[] };
+    const selectedLinks = Object.entries(links)
+      .filter(([, value]) => value)
+      .map(([key]) => key);
+
+    if (selectedLinks.length > 0) {
+      const intriguesNode = { text: 'Intrigues', children: [] as any[] };
+      selectedLinks.forEach((link) => {
+        intriguesNode.children.push({ text: link.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase()) });
+      });
+      root.children.push(intriguesNode);
+    }
+
+    if (character.name) {
+      const characterNode = { text: `Personnage: ${character.name}`, children: [] as any[] };
+      root.children.push(characterNode);
+    }
+
+    setMindMapNodes(root);
+  }, [links, character.name]);
 
   /* ---------- UTILS ---------- */
   const handleMulti = (setter: any, key: string) => (v: string) =>
@@ -482,14 +509,35 @@ export default function UltimateNCPGenerator() {
             <Card>
               <CardHeader><CardTitle>Liens & intrigues entre personnages</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {["loyaltyConflict","redemptionQuest","raceAgainstTime","betrayal","familySecret","forbiddenLove","powerCorruption","survival","rivalry","truthQuest"].map(key => (
+                {[
+                  { key: 'loyaltyConflict', label: 'Conflit de loyauté' },
+                  { key: 'redemptionQuest', label: 'Quête de rédemption' },
+                  { key: 'raceAgainstTime', label: 'Course contre la montre' },
+                  { key: 'betrayal', label: 'Trahison' },
+                  { key: 'familySecret', label: 'Secret de famille' },
+                  { key: 'forbiddenLove', label: 'Amour interdit' },
+                  { key: 'powerCorruption', label: 'Corruption par le pouvoir' },
+                  { key: 'survival', label: 'Survie' },
+                  { key: 'rivalry', label: 'Rivalité' },
+                  { key: 'truthQuest', label: 'Quête de vérité' },
+                ].map(({ key, label }) => (
                   <label key={key} className="flex items-center gap-2">
-                    <input type="checkbox" checked={(links as any)[key]} onChange={(e) => setLinks({ ...links, [key]: e.target.checked })} />
-                    {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                    <input
+                      type="checkbox"
+                      checked={(links as any)[key]}
+                      onChange={(e) => setLinks({ ...links, [key]: e.target.checked })}
+                    />
+                    {label}
                   </label>
                 ))}
                 <SelectMulti label="Niveau d'intrigue" value={links.intrigueLevel} onChange={handleMulti(setLinks, 'intrigueLevel')} options={["Intrigue principale","Intrigue secondaire","Sous-intrigue"]} />
                 <TextWithSuggestion label="Arbre généalogique" value={links.genealogy} onChange={(v) => setLinks({ ...links, genealogy: v })} placeholder="Arbre généalogique" />
+              </CardContent>
+            </Card>
+            <Card className="mt-6">
+              <CardHeader><CardTitle>Mind Map des intrigues</CardTitle></CardHeader>
+              <CardContent>
+                <Mindmap nodes={mindMapNodes} />
               </CardContent>
             </Card>
           </TabsContent>
