@@ -13,7 +13,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const SelectMulti = ({ label, value, onChange, options }: any) => (
   <div>
     <label className="block text-sm font-medium mb-1">{label}</label>
-    <Select value={value.join(',')} onValueChange={(v) => onChange(v.split(',').filter(Boolean))}>
+    <Select
+      value={Array.isArray(value) ? value.join(',') : value}
+      onValueChange={(v) => onChange(v.split(',').filter(Boolean))}
+    >
       <SelectTrigger>
         <SelectValue placeholder={`Sélectionner ${label.toLowerCase()}`} />
       </SelectTrigger>
