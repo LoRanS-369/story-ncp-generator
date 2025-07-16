@@ -43,23 +43,6 @@ const SelectMulti = ({ label, value, onChange, options }: any) => {
   );
 };
 
-// Wrapper pour compatibilité avec SelectMulti existant
-const SelectMulti = ({ label, value, onChange, options }: any) => {
-  const safeValue = Array.isArray(value) ? value : (value ? [value] : []);
-  
-  return (
-    <VisibleSelect
-      label={label}
-      value={safeValue.join(', ')}
-      onChange={(v: string) => {
-        const arr = v ? v.split(',').map(s => s.trim()).filter(Boolean) : [];
-        onChange(arr);
-      }}
-      options={options}
-    />
-  );
-};
-
 /* ---------- Helper : TextWithSuggestion ---------- */
 const TextWithSuggestion = ({ label, value, onChange, placeholder }: any) => {
   const [loading, setLoading] = useState(false);
