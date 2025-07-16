@@ -2,28 +2,21 @@
 
 import ReactFlow, { MiniMap, Controls, Background } from 'reactflow'; import 'reactflow/dist/style.css'; import { useState, useEffect } from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; import { Button } from '@/components/ui/button'; import { Textarea } from '@/components/ui/textarea'; import { Input } from '@/components/ui/input'; import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; import { Badge } from '@/components/ui/badge'; import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-/* ---------- Helper : SelectMulti (VERSION SIMPLIFIÉE ET FIABLE) ---------- */ const SelectMulti = ({ label, value, onChange, options, singleSelection = false }) => { // S'assurer que la valeur est toujours un tableau const currentValues = Array.isArray(value) ? value : (value ? [value] : []);
+/* ---------- Helper : SelectMulti (VERSION CORRIGÉE) ---------- */ const SelectMulti = ({ label, value, onChange, options, singleSelection = false }) => { const currentValues = Array.isArray(value) ? value : (value ? [value] : []);
 
-const handleSelect = (selectedValue) => { if (singleSelection) { onChange(selectedValue); return; }
-
-const newValues = currentValues.includes(selectedValue)
-  ? currentValues.filter(v => v !== selectedValue)
-  : [...currentValues, selectedValue];
-
-onChange(newValues);
-};
+const handleSelect = (selectedValue) => { if (singleSelection) { onChange(selectedValue); return; } const newValues = currentValues.includes(selectedValue) ? currentValues.filter((v) => v !== selectedValue) : [...currentValues, selectedValue]; onChange(newValues); };
 
 const displayText = currentValues.join(', ');
 
 return (
 
-<Select onValueChange={handleSelect} value={singleSelection && currentValues.length > 0 ? currentValues[0] : ""}>
+<Select onValueChange={handleSelect} value={singleSelection && currentValues.length > 0 ? currentValues[0] : ''} >
   {!singleSelection && currentValues.length > 0 && (
     <div className="flex flex-wrap gap-1 mt-2">
       {currentValues.map((item) => (
-        <Badge 
-          key={item} 
-          variant="secondary" 
+        <Badge
+          key={item}
+          variant="secondary"
           className="text-xs cursor-pointer hover:bg-red-100"
           onClick={() => handleSelect(item)}
         >
@@ -345,3 +338,4 @@ Toutes les options PDF intégrées + IA
   </div>
 </div>
 ); }
+
