@@ -1,5 +1,3 @@
-je te redone mon code. Fais la modifiction en y intégrant ta partie de code exactement à l'endroit que tu souhaites et redonne moi l'ensemble quand tu auras fini :
-
 'use client';
 
 import ReactFlow, { MiniMap, Controls, Background } from 'reactflow';
