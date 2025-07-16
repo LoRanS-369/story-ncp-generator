@@ -11,91 +11,78 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-/* ---------- Helper : SelectMulti (VERSION SIMPLIFIÉE) ---------- */
+/* ---------- Helper : SelectMulti (VERSION CORRIGÉE) ---------- */
 const SelectMulti = ({ label, value, onChange, options }) => {
-  // Normaliser la valeur : toujours traiter comme un tableau
-  const currentValues = Array.isArray(value) ? value : (value ? [value] : []);
+  // Normaliser la valeur pour qu'elle soit toujours un tableau
+  const normalizedValue = Array.isArray(value) ? value : (value ? [value] : []);
   
-  // Texte d'affichage
-  const displayText = currentValues.length > 0 
-    ? currentValues.join(', ') 
-    : `Sélectionner ${label.toLowerCase()}`;
+  // Créer le texte d'affichage
+  const displayText = normalizedValue.length > 0 
+    ? normalizedValue.join(', ') 
+    : '';
 
   const handleSelect = (selectedValue) => {
-    if (!selectedValue) return;
-
-    const isSelected = currentValues.includes(selectedValue);
-    let newValues;
-
-    if (isSelected) {
-      // Retirer la valeur
-      newValues = currentValues.filter(v => v !== selectedValue);
-    } else {
-      // Ajouter la valeur
-      newValues = [...currentValues, selectedValue];
+    if (!selectedValue) {
+      onChange([]);
+      return;
     }
 
-    // Appeler onChange avec le bon format
-    onChange(newValues);
-  };
+    let newValue;
+    if (normalizedValue.includes(selectedValue)) {
+      // Si la valeur est déjà sélectionnée, la retirer
+      newValue = normalizedValue.filter(v => v !== selectedValue);
+    } else {
+      // Sinon, l'ajouter
+      newValue = [...normalizedValue, selectedValue];
+    }
 
-  const clearAll = () => {
-    onChange([]);
+    // Retourner selon le format attendu
+    if (newValue.length === 0) {
+      onChange([]);
+    } else if (newValue.length === 1) {
+      onChange(newValue[0]); // Retourner string si une seule valeur
+    } else {
+      onChange(newValue); // Retourner array si plusieurs valeurs
+    }
   };
 
   return (
     <div>
       <label className="block text-sm font-medium mb-1">{label}</label>
-      
-      {/* Affichage des valeurs sélectionnées */}
-      <div className="min-h-[40px] p-2 border rounded-md bg-white dark:bg-gray-800 mb-2">
-        {currentValues.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
-            {currentValues.map((item, index) => (
-              <Badge 
-                key={index} 
-                variant="secondary" 
-                className="text-xs cursor-pointer hover:bg-red-100"
-                onClick={() => handleSelect(item)}
-              >
-                {item} ✕
-              </Badge>
-            ))}
-          </div>
-        ) : (
-          <span className="text-gray-500 text-sm">{displayText}</span>
-        )}
-      </div>
-
-      {/* Menu déroulant pour ajouter des options */}
       <Select value="" onValueChange={handleSelect}>
         <SelectTrigger className="text-black bg-white dark:text-white dark:bg-gray-800">
-          <SelectValue placeholder="Ajouter une option" />
+          <SelectValue placeholder={displayText || `Sélectionner ${label.toLowerCase()}`}>
+            {displayText || `Sélectionner ${label.toLowerCase()}`}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent className="text-black bg-white dark:text-white dark:bg-gray-800">
           {options.map((option) => (
             <SelectItem key={option} value={option}>
               <div className="flex items-center gap-2">
-                {currentValues.includes(option) && (
-                  <span className="text-blue-600">✓</span>
-                )}
+                <span className={normalizedValue.includes(option) ? "text-blue-600 font-medium" : ""}>
+                  {normalizedValue.includes(option) ? "✓" : ""}
+                </span>
                 {option}
               </div>
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-
-      {/* Bouton pour tout effacer */}
-      {currentValues.length > 0 && (
-        <Button 
-          onClick={clearAll} 
-          size="sm" 
-          variant="outline" 
-          className="mt-2"
-        >
-          Tout effacer
-        </Button>
+      
+      {/* Afficher les sélections actuelles sous forme de badges */}
+      {normalizedValue.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {normalizedValue.map((item, index) => (
+            <Badge 
+              key={index} 
+              variant="secondary" 
+              className="text-xs cursor-pointer hover:bg-red-100"
+              onClick={() => handleSelect(item)}
+            >
+              {item} ✕
+            </Badge>
+          ))}
+        </div>
       )}
     </div>
   );
