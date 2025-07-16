@@ -11,25 +11,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-/* ---------- Helper : SelectMulti ultra-simple ---------- */
+/* ---------- Helper : SelectMulti (texte toujours visible) ---------- */
 const SelectMulti = ({ label, value, onChange, options }: any) => {
-  // Texte à afficher
-  const displayText = Array.isArray(value)
+  const displayText = Array.isArray(value) && value.length > 0
     ? value.join(', ')
     : (value || '');
+
+  const handleSelect = (v: string) => {
+    const arr = v ? v.split(',').filter(Boolean) : [];
+    onChange(arr.length === 1 ? arr[0] : arr);
+  };
 
   return (
     <div>
       <label className="block text-sm font-medium mb-1">{label}</label>
-      <Select
-        value={Array.isArray(value) ? value.join(',') : value}
-        onValueChange={(v) => {
-          const arr = v ? v.split(',').filter(Boolean) : [];
-          onChange(arr.length === 1 ? arr[0] : arr);
-        }}
-      >
+      <Select value={displayText} onValueChange={handleSelect}>
         <SelectTrigger className="text-black bg-white dark:text-white dark:bg-gray-800">
-          <span>{displayText || `Sélectionner ${label.toLowerCase()}`}</span>
+          <SelectValue placeholder={`Sélectionner ${label.toLowerCase()}`}>
+            {displayText || `Sélectionner ${label.toLowerCase()}`}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent className="text-black bg-white dark:text-white dark:bg-gray-800">
           {options.map((o: string) => (
