@@ -1,32 +1,6 @@
 'use client';
 
-import ReactFlow, { MiniMap, Controls, Background } from 'reactflow'; import 'reactflow/dist/style.css'; import { useState, useEffect } from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; import { Button } from '@/components/ui/button'; import { Textarea } from '@/components/ui/textarea'; import { Input } from '@/components/ui/input'; import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; import { Badge } from '@/components/ui/badge'; import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-/* ---------- Helper : SelectMulti (VERSION CORRIGÉE) ---------- */ const SelectMulti = ({ label, value, onChange, options, singleSelection = false }) => { const currentValues = Array.isArray(value) ? value : (value ? [value] : []);
-
-const handleSelect = (selectedValue) => { if (singleSelection) { onChange(selectedValue); return; } const newValues = currentValues.includes(selectedValue) ? currentValues.filter((v) => v !== selectedValue) : [...currentValues, selectedValue]; onChange(newValues); };
-
-const displayText = currentValues.join(', ');
-
-return (
-
-<Select onValueChange={handleSelect} value={singleSelection && currentValues.length > 0 ? currentValues[0] : ''} >
-  {!singleSelection && currentValues.length > 0 && (
-    <div className="flex flex-wrap gap-1 mt-2">
-      {currentValues.map((item) => (
-        <Badge
-          key={item}
-          variant="secondary"
-          className="text-xs cursor-pointer hover:bg-red-100"
-          onClick={() => handleSelect(item)}
-        >
-          {item} ✕
-        </Badge>
-      ))}
-    </div>
-  )}
-</div>
-); };
+import ReactFlow, { MiniMap, Controls, Background } from 'reactflow'; import 'reactflow/dist/style.css'; import { useState, useEffect } from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; import { Button } from '@/components/ui/button'; import { Textarea } from '@/components/ui/textarea'; import { Input } from '@/components/ui/input'; import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; import { Badge } from '@/components/ui/badge'; import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'; import SelectMulti from '@/components/ui/select-multi';
 
 /* ---------- Helper : TextWithSuggestion ---------- */ const TextWithSuggestion = ({ label, value, onChange, placeholder }: any) => { const [loading, setLoading] = useState(false); const suggest = async () => { setLoading(true); try { const res = await fetch('/api/openrouter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: Suggère une courte idée pour : ${label}, maxTokens: 60 }), }); const data = await res.json(); onChange(data.result?.trim() || ''); } catch { alert('Erreur suggestion'); } finally { setLoading(false); } }; return (
 
@@ -338,4 +312,3 @@ Toutes les options PDF intégrées + IA
   </div>
 </div>
 ); }
-
