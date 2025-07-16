@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 /* ---------- NOUVEAU : SelectMulti avec badges ---------- */
 const SelectMulti = ({ label, value, onChange, options }: any) => {
-  const selected = Array.isArray(value) ? value : [];
+  const selected = (Array.isArray(value) ? value : []).filter(Boolean);
 
   const handleSelect = (newValue: string) => {
     if (!selected.includes(newValue)) {
