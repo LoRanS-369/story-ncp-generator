@@ -25,7 +25,7 @@ const SelectMulti = ({ label, value, onChange, options }: any) => {
           onChange(arr.length === 1 ? arr[0] : arr);
         }}
       >
-        <SelectTrigger>
+        <SelectTrigger className="text-black">
           <SelectValue placeholder={`Sélectionner ${label.toLowerCase()}`} />
         </SelectTrigger>
         <SelectContent>
