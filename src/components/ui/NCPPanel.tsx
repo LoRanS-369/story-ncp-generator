@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -34,7 +34,6 @@ export default function NCPPanel({
   generatedText,
   setGeneratedText,
 }: any) {
-  const [ncpData, setNcpData] = useState<NCPData | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -76,7 +75,6 @@ export default function NCPPanel({
     reader.onload = (event) => {
       try {
         const data = JSON.parse(event.target?.result as string) as NCPData;
-        setNcpData(data);
         setGeneratedText(data.text || '');
       } catch {
         alert('Fichier NCP invalide.');
