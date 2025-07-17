@@ -348,6 +348,7 @@ export default function UltimateNCPGenerator() {
             <TabsTrigger value="locations">📍 Lieux</TabsTrigger>
             <TabsTrigger value="themes">📚 Thèmes</TabsTrigger>
             <TabsTrigger value="custom">⚙️ IA & Style</TabsTrigger>
+            <TabsTrigger value="ncp">🧠 NCP</TabsTrigger>
           </TabsList>
 
           {/* ONGLET HISTOIRE */}
@@ -563,6 +564,21 @@ export default function UltimateNCPGenerator() {
               </CardContent>
             </Card>
           </TabsContent>
+
+{/* ONGLET NCP */}
+<TabsContent value="ncp">
+  <NCPPanel
+    story={story}
+    character={character}
+    chapters={chapters}
+    links={links}
+    locations={locations}
+    themes={themes}
+    customization={customization}
+    generatedText={result}
+    setGeneratedText={setResult}
+  />
+</TabsContent>
         </Tabs>
 
         {/* ACTIONS GLOBALES */}
