@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import NCPPanel from '@/components/NCPPanel';
 
 /* ---------- NOUVEAU : SelectMulti avec badges ---------- */
 const SelectMulti = ({ label, value, onChange, options }: any) => {
