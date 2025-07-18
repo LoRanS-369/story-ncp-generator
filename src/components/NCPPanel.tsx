@@ -36,6 +36,18 @@ export default function NCPPanel({
 }: any) {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [analyses, setAnalyses] = useState({
+    throughlines: '',
+    emotion: '',
+    themesActions: '',
+    pacing: '',
+    conflict: '',
+    redundancies: '',
+    worldConsistency: '',
+    subplots: '',
+    narrativeVoice: '',
+    climax: '',
+  });
 
   const buildNCP = () => ({
     ncpVersion: '1.0',
@@ -101,6 +113,50 @@ export default function NCPPanel({
     }
   };
 
+  const analyzeDeep = async () => {
+    setLoading(true);
+    const prompt = `Analyse cette histoire avec les critères suivants : 
+- Cohérence des 4 throughlines (Main Character, Impact Character, Relationship, Overall) 
+- Progression émotionnelle du protagoniste 
+- Cohérence des thèmes avec les actions 
+- Pacing dramatique (pics et creux) 
+- Dynamique de conflit (cause-effet) 
+- Redondances ou incohérences 
+- Cohérence des lieux et règles du monde 
+- Sous-intrigues et liens 
+- Voix narrative et ton 
+- Climax et résolution 
+Donne-moi un rapport clair et des suggestions concrètes.
+
+Histoire: ${JSON.stringify({ story, character, chapters, links, locations, themes, generatedText })}`;
+    try {
+      const res = await fetch('/api/openrouter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, maxTokens: 1000 }),
+      });
+      const data = await res.json();
+      // Assuming the response is a structured text, parse it simply for demo
+      const parts = data.result?.split('\n\n') || [];
+      setAnalyses({
+        throughlines: parts[0] || '',
+        emotion: parts[1] || '',
+        themesActions: parts[2] || '',
+        pacing: parts[3] || '',
+        conflict: parts[4] || '',
+        redundancies: parts[5] || '',
+        worldConsistency: parts[6] || '',
+        subplots: parts[7] || '',
+        narrativeVoice: parts[8] || '',
+        climax: parts[9] || '',
+      });
+    } catch {
+      alert('Erreur analyse approfondie IA.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <TabsContent value="ncp">
       <Card>
@@ -123,11 +179,25 @@ export default function NCPPanel({
               <li>✅ Personnage principal : {character.name || 'Non défini'}</li>
               <li>✅ Thèmes : {themes.general.join(', ') || 'Aucun'}</li>
               <li>✅ Conflit principal : {character.conflict || 'Non défini'}</li>
+              <li>✅ Throughlines : {analyses.throughlines}</li>
+              <li>✅ Progression émotionnelle : {analyses.emotion}</li>
+              <li>✅ Cohérence thèmes/actions : {analyses.themesActions}</li>
+              <li>✅ Pacing : {analyses.pacing}</li>
+              <li>✅ Dynamique de conflit : {analyses.conflict}</li>
+              <li>✅ Redondances et incohérences : {analyses.redundancies}</li>
+              <li>✅ Cohérence des lieux : {analyses.worldConsistency}</li>
+              <li>✅ Sous-intrigues : {analyses.subplots}</li>
+              <li>✅ Voix narrative : {analyses.narrativeVoice}</li>
+              <li>✅ Climax et résolution : {analyses.climax}</li>
             </ul>
           </div>
 
           <Button onClick={analyzeWithAI} disabled={loading}>
             {loading ? 'Analyse en cours...' : '🔍 Analyser avec l’IA'}
+          </Button>
+
+          <Button onClick={analyzeDeep} disabled={loading}>
+            {loading ? 'Analyse en cours...' : '🔍 Analyse Approfondie avec l’IA'}
           </Button>
 
           {suggestions.length > 0 && (
